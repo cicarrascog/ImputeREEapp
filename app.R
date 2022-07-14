@@ -18,27 +18,36 @@ sample_data <- testing_data %>%  slice(10) %>%  select(matches(paste0('Zr_',REE_
 `%notin%` <- Negate(`%in%`)
 # Define UI for application that draws a histogram
 ui <- fluidPage(
-
-    # Application title
-    titlePanel("Calculate REE"),
+  theme = bslib::bs_theme(bootswatch = "darkly"),
+  titlePanel("Calculate REE"),
+  
+  
+sidebarLayout(
+  sidebarPanel(
     selectInput(inputId = 'test', label = 'asdfadsfa', choices = '12', selectize = F
-                  ),
+    ),
     fileInput(inputId = 'newFile', label = 'Upload File', ),
-    checkboxGroupInput(inputId = 'NormalizeMethod' ,label = 'Chondrite Values', choices = REE_plus_Y_Elements, selected = REE_plus_Y_Elements[REE_plus_Y_Elements %notin% c('La','Ce','Eu','Y')], inline = T),
-    # Sidebar with a slider input for number of bins
+    checkboxGroupInput(inputId = 'NormalizeMethod' ,label = 'Chondrite Values', choices = REE_plus_Y_Elements, selected = REE_plus_Y_Elements[REE_plus_Y_Elements %notin% c('La','Ce','Eu','Y')]),
+    textOutput('Rees')
+    
+    
+  ),
+  mainPanel(
+    
+    plotOutput('R2_plot' ),
+    dataTableOutput('Result'),
+  )
+  
+)
 
-        # Show a plot of the generated distribution
-        mainPanel(
-           textOutput('Rees'),
-           dataTableOutput('Result'),
-           plotOutput('R2_plot', )
-        )
+
+      
     )
 
 
 # Define server logic required to draw a histogram
 server <- function(input, output) {
-
+  thematic::thematic_shiny()
   modelled_data <- reactive({
     
  
