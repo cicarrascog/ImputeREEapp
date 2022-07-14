@@ -10,13 +10,20 @@
 library(shiny)
 library(tidyverse)
 library(imputeREE)
+
+
+
+sample_data <- testing_data %>%  slice(10) %>%  select(matches(paste0('Zr_',REE_plus_Y_Elements, '_ppm'))) %>%  rename_with(~str_remove_all(.x, '^Zr_|_ppm$')) 
+
 `%notin%` <- Negate(`%in%`)
 # Define UI for application that draws a histogram
 ui <- fluidPage(
 
     # Application title
     titlePanel("Calculate REE"),
-    fileInput(inputId = 'newFile', label = 'Upload File'),
+    selectInput(inputId = 'test', label = 'asdfadsfa', choices = '12', selectize = F
+                  ),
+    fileInput(inputId = 'newFile', label = 'Upload File', ),
     checkboxGroupInput(inputId = 'NormalizeMethod' ,label = 'Chondrite Values', choices = REE_plus_Y_Elements, selected = REE_plus_Y_Elements[REE_plus_Y_Elements %notin% c('La','Ce','Eu','Y')], inline = T),
     # Sidebar with a slider input for number of bins
 
@@ -24,7 +31,7 @@ ui <- fluidPage(
         mainPanel(
            textOutput('Rees'),
            dataTableOutput('Result'),
-           plotOutput('R2_plot')
+           plotOutput('R2_plot', )
         )
     )
 
@@ -33,11 +40,17 @@ ui <- fluidPage(
 server <- function(input, output) {
 
   modelled_data <- reactive({
+    
+ 
+    
    REE_to_model <- REE_plus_Y_Elements[REE_plus_Y_Elements %notin% input$NormalizeMethod]
    print(REE_to_model)
+   
+  
    data <- read_csv(input$newFile$datapath)
    data <- data  %>%  model_REE(., exclude = REE_to_model)
    return(data)
+   
  })
 
 
@@ -47,6 +60,7 @@ server <- function(input, output) {
     })
     output$Result <- renderDataTable({
 
+      
       modelled_data()
 
 
