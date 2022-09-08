@@ -1,4 +1,4 @@
-# code
+# Code
 
 The models are constructed using the [`imputeREE`
 package](https://cran.r-project.org/web/packages/imputeREE/index.html)
@@ -9,7 +9,11 @@ and app is built using:[`Shiny`](https://github.com/rstudio/shiny),
 [`reactablefmtr`](https://github.com/kcuilla/reactablefmtr/) and
 [`markdown`](https://cran.r-project.org/web/packages/markdown/index.html)
 
-Code for the app can be found here (githublink to be added)
+Code can be found here:
+
+-   App repository: <https://github.com/cicarrascog/ImputeREEapp>
+
+-   imputeREE repository: <https://github.com/cicarrascog/ImputeREE>
 
 # References
 
