@@ -1,4 +1,4 @@
-#a
+# a
 # This is a Shiny web application. You can run the application by clicking
 # the 'Run App' button above.
 #
@@ -6,101 +6,237 @@
 #
 #    http://shiny.rstudio.com/
 #
-library(vctrs)
+options(scipen=100000)
 library(shiny)
 library(tidyverse)
 library(imputeREE)
 library(reactable)
 library(reactablefmtr)
-
-
-# options(shiny.ragg = TRUE)
-
-
+library(markdown)
+library(bs4Dash)
 `%notin%` <- Negate(`%in%`)
-# test_data <- testing_data %>%  slice(1:50) %>%  select(matches(paste0('Zr_',REE_plus_Y_Elements, '_ppm'))) %>%  rename_with(~str_remove_all(.x, '^Zr_|_ppm$')) %>%  write_csv('test.csv')
-
-sample_data <- testing_data %>%
-  slice(1:10) %>%
-  select(matches(paste0("Zr_", REE_plus_Y_Elements, "_ppm"))) %>%
-  rename_with(~ str_remove_all(.x, "^Zr_|_ppm$"))
 
 
+header <- bs4DashNavbar(
+  title = dashboardBrand(
+    title = "ImputeREEapp",
+    color = "primary"
+    # href = "https://adminlte.io/themes/v3",
+    # image = "https://adminlte.io/themes/v3/dist/img/AdminLTELogo.png"
+  ), border = F,
+  skin = "dark"
+)
 
+sidebar <- dashboardSidebar(
+  title = "ImputeREEapp",
+  sidebarMenu(
+    menuItem(text = "Welcome", tabName = "Instructions"),
+    menuItem(text = "Upload", tabName = "Upload"),
+    menuItem(text = "Data", tabName = "Data"),
+    menuItem(text = "Download", tabName = "Download"),
+    menuItem(text = "References", tabName = "References"),
+    menuItem(text = "Changelog", tabName = "Changelog"),
+    menuItem(text = "Contact", tabName = "Contact")
+  )
+)
 
-
-
-ui <- fluidPage(
-  # theme = bslib::bs_theme(bootswatch = "journal"),
- # shinythemes::themeSelector(),
-  theme = shinythemes::shinytheme('journal'),
-  titlePanel("ImputeREEapp"),
-  sidebarLayout(
-    ############### SIDEBAR #####################
-    sidebarPanel(
-
-      tableOutput("testing"),
-
-      sliderInput(inputId = 'Y', label = 'Y correction',  value = 1.29,     min = 0.1, max = 2 ),
-      sliderInput(inputId = 'Yb',label = 'Yb correction', value = 1/0.8785, min = 0.1, max = 2  ),
-      sliderInput(inputId = 'Lu',label = 'Lu correction', value = 1/0.8943, min = 0.1, max = 2 ),
-
-
-      ### load_file ##############
-      fileInput(inputId = "newFile", label = NULL, accept = c(".csv"), buttonLabel = "Upload...", placeholder = "a .csv file"),
-
-
-      ### Print modelled REE ############
-      textOutput("Rees"),
-
-
-      ### select REE to model #############
-      checkboxGroupInput(inputId = "NormalizeMethod", label = "Chondrite Values", choices = REE_plus_Y_Elements, selected = REE_plus_Y_Elements[REE_plus_Y_Elements %notin% c("La", "Ce", "Eu", "Y")]),
-      ############################
-
-      ### impute? ################
-      checkboxInput(inputId = "impute", label = "Impute?", value = FALSE),
-      ### Include_norm? ################
-      checkboxInput(inputId = "include_norm_values", label = "Include Chondrite Normalized Values?", value = FALSE),
-
-
-      ### chondrite_values_from #############
-      radioButtons(
-        inputId = "chondrite_values", label = "Chondrite Values",
-        choices = c(
-          `Palme and O'Neill (2014)` = "PalmeOneill2014CI",
-          `McDonough and Sun (1995)` = "McDonough1995CI"
+body <- dashboardBody(
+  tabItems(
+    tabItem(
+      tabName = "Instructions",
+      box(includeMarkdown("README.md"), width = 8)
+    ),
+    tabItem(
+      tabName = "Upload",
+      fluidRow(
+        box(title = HTML('<b>Upload</b>'),
+          width = 5,
+          headerBorder = F,
+          collapsible = F,
+          solidHeader = T,
+          label = boxLabel(text = "Help", status = "info", tooltip = "Upload a CSV file"),
+          fileInput(
+            inputId = "newFile", # upload file ####
+            label = NULL,
+            accept = c(".csv"),
+            buttonLabel = "Upload...",
+            placeholder = "a .csv file"
+          ),
+          radioButtons(
+            inputId = "chondrite_values", # Choose chondrite values ####
+            label = "Chondrite Values",
+            choices = c(
+              `Palme and O'Neill (2014)` = "PalmeOneill2014CI",
+              `McDonough and Sun (1995)` = "McDonough1995CI"
+            )
+          )
+        ),
+        box(title = HTML('<b>Model variables</b>'),
+          width = 7,
+          headerBorder = F,
+          collapsible = F,
+          solidHeader = T,
+          HTML('Selected elements are used for modelling. '),
+          textOutput("Rees"), # Choose chondrite values ####
+          p(""), ### space lol
+          checkboxGroupInput(
+            inputId = "NormalizeMethod",
+            label = "Chondrite Values",
+            inline = T,
+            choices = REE_plus_Y_Elements,
+            selected = REE_plus_Y_Elements[REE_plus_Y_Elements %notin%
+              c("La", "Ce", "Eu", "Y")]
+          )
+        )
+        ## here another box
+      ),
+      fluidRow(
+        box(
+          title = HTML('<b>R<sup>2</sup> plot</b>'),
+          plotOutput("R2_plot"),
+          headerBorder = F,
+          collapsible = F,
+          solidHeader = T,
+          sidebar = boxSidebar(
+            id = "reference_line",
+            sliderInput(
+              inputId = "reference_line_R2",
+              label = "Reference Line",
+              value = 0.9,
+              min = 0.001,
+              max = 0.999,
+              step = 0.01
+            ),
+            checkboxInput(
+              inputId = "hide_reference_line",
+              label = "Hide line"
+            ),
+            checkboxInput(
+              inputId = "AdjustedR2",
+              label = "Use adjusted R2"
+            )
+          )
+        ),
+        box(
+          title = HTML('<b>Ratio Boxplot</b>'),
+          plotOutput("ratio_plot"),
+          headerBorder = F,
+          collapsible = F,
+          solidHeader = T,
+          sidebar = boxSidebar(
+            id = "correct_heavy_sliders",
+            sliderInput(inputId = "Y", label = "Y correction", value = 1.29, min = 0.1, max = 2),
+            sliderInput(inputId = "Yb", label = "Yb correction", value = 1/0.8785 , min = 0.1, max = 2), ## 1 / 0.8785
+            sliderInput(inputId = "Lu", label = "Lu correction", value = 1/0.8943 , min = 0.1, max = 2),
+            sliderInput(
+              inputId = "rsquared_filter",
+              label = "R squared filter",
+              value = 0.9,
+              min = 0,
+              max = 2,
+              step = 0.001
+            )##  1 / 0.8943
+          )
+        ) ## here another box
+      ) ,
+      fluidRow(
+        box(title = HTML('<b>Summary statistics</b>'),
+          width = 12,
+            reactableOutput('ratio_table')
+            )
+        )## here another fluidrow
+    ),
+    tabItem(
+      tabName = "Data",
+      fluidRow(
+        box(
+          headerBorder = F,
+          collapsible = F,
+          solidHeader = T,
+          plotOutput("REE_plot"),
+          sidebar = boxSidebar(
+            id = "Strain_check",
+            checkboxInput(inputId = "strain", label = "Use lattice strain expression?", value = F),
+            checkboxInput(inputId = "complete_lines", label = "Complete pattern when data is missing?", value = F),
+            checkboxInput(inputId = "hide_original", label = "Hide Original", value = F),
+            checkboxInput(inputId = "hide_calculated", label = "Hide Calculated", value = F),
+            checkboxInput(inputId = "hide_legend", label = "Hide Legend", value = F)
+          )
+        ),
+        box(
+          headerBorder = F,
+          collapsible = F,
+          solidHeader = T,
+          reactableOutput("REE")
         )
       ),
-      downloadButton(outputId = "donwload_data"),
-      ################################
-
-      ############ Main Panel ########################
+      fluidRow(
+        box(
+          rightBorder = F,
+          headerBorder = F,
+          collapsible = F,
+          solidHeader = T,
+          reactableOutput("Result"), width = 12
+        )
+      )
     ),
-    mainPanel(
-      plotOutput("R2_plot"),
-      plotOutput("REE_plot"),
-      plotOutput("ratio_plot"),
-      reactableOutput("Result"),
-      tableOutput('REE')
+    tabItem(
+      tabName = "Download",
+      tooltip(
+        title = "Should imputed values be included in the Output?",
+        placement = "right",
+        tag = checkboxInput(
+          inputId = "impute",
+          label = "Impute?",
+          value = FALSE
+        )
+      ),
+      tooltip(
+        title = "Should Chondrite normalized values be included in the Output?",
+        placement = "right",
+        tag = checkboxInput(
+          inputId = "include_norm_values",
+          label = "Include Chondrite Normalized Values?",
+          value = FALSE
+        )
+      ),
+      downloadButton(outputId = "donwload_data")
+    ),
+    tabItem(
+      tabName = "References",
+      box(includeMarkdown('Reference.md'), width = 9)
+    ),
+    tabItem(
+      tabName = "Changelog",
+      box(includeMarkdown('Changelog.md'), width = 9)
+    ),
+    tabItem(
+      tabName = "Contact",
+      box(includeMarkdown('Contact.md'), width = 9)
     )
+
   )
 )
 
 
+
+
+####### ui ############
+ui <- dashboardPage(header, sidebar, body, title = "ImputeREEapp", help = T)
+
+
 # Define server logic required to draw a histogram
 server <- function(input, output) {
-  thematic::thematic_shiny(font = thematic::font_spec(families = 'helvetica')) ## makes plots to match html theme
+  thematic::thematic_shiny() ## makes plots to match html theme
 
   # Check_names <- reactive({
   #
   # })
 
   sample_data <- reactive({
-
     testing_data %>%
-      slice(1:10) %>%
-      select(matches(paste0("Zr_", REE_plus_Y_Elements, "_ppm"))) %>%
+      # slice(1:500) %>%
+      select(matches(paste0("Zr_", REE_plus_Y_Elements, "_ppm")),Zr_P_ppm) %>%
       rename_with(~ str_remove_all(.x, "^Zr_|_ppm$"))
   })
 
@@ -115,7 +251,7 @@ server <- function(input, output) {
 
     if (is.null(input$newFile)) {
       data <- sample_data()
-    } else{
+    } else {
       data <- read_csv(input$newFile$datapath)
     }
 
@@ -137,34 +273,63 @@ server <- function(input, output) {
 
     normalized_data <- data %>% imputeREE:::Element_norm(method = !!sym(input$chondrite_values))
 
-    data <- data %>% model_REE(., exclude = REE_to_model, method = !!sym(input$chondrite_values), correct_heavy = F)
+    withProgress(
+      message = "Fitting Models",
+      data <- data %>% model_REE(., exclude = REE_to_model, method = !!sym(input$chondrite_values), correct_heavy = F)
+    )
+
     complete_data <- left_join(data, normalized_data, by = "rowid") %>%
-      relocate(
-        rowid, REE_plus_Y_Elements,
-        matches("_Normalized$"), matches("^ppmCalc_"), matches("^NormalizedCalc_")
+      rename(
+        `R.squared` = model_r.squared,
+        `adj.R.squared` = model_adj.r.squared,
+        `Intercept` = estimate_Intercept,
+        `Slope` = estimate_Slope,
       )
 
     return(complete_data)
   })
 
 
-  modelled_data <- reactive({
-    data <- base_data() %>%  imputeREE:::correct_heavy(Y_correction_fact = input$Y ,
-                                                       Yb_correction_fact = input$Yb,
-                                                       Lu_correction_fact = input$Lu)
+
+
+  corrected_data <- reactive({
+    data <- base_data() %>% imputeREE:::correct_heavy(
+      Y_correction_fact = input$Y,
+      Yb_correction_fact = input$Yb,
+      Lu_correction_fact = input$Lu
+    )
 
     return(data)
   })
 
   ###  Create long format with normalized values
   norm_table <- reactive({
+    data <- corrected_data() %>%
+      select(rowid, `R.squared` , matches("Normalized")) %>%
+      rename_with(.cols = matches("Normalized$"), ~ paste0("Normalized_", str_remove_all(.x, "_Normalized$"))) %>%
+      pivot_longer(cols = matches("Normalized"), names_to = c(".value", "Element_name"), names_sep = "_") %>%
+      imputeREE:::add_IonicRadii() %>%
+      rename(`Ionic Radius` = ShannonRadiiVIII_Coord_3plus) %>%
+      mutate(Ratio = NormalizedCalc / Normalized)
 
-   data <-  modelled_data() %>%  select(rowid, matches('Normalized')) %>%  rename_with(.cols = matches('Normalized$'), ~paste0('Normalized_',str_remove_all(.x, '_Normalized$'))) %>%
-      pivot_longer(cols = matches('Normalized'), names_to = c('.value','Element_name'), names_sep = '_') %>%  imputeREE:::add_IonicRadii() %>%  rename(`Ionic Radius` = ShannonRadiiVIII_Coord_3plus) %>%  mutate(Ratio = NormalizedCalc/Normalized)
-
-  data_long <-  data %>%  select(-Ratio) %>%  pivot_longer(cols = c('NormalizedCalc', 'Normalized'), names_to = 'Data Type', values_to = 'Chondrite Normalized')
+    data_long <- data %>%
+      select(-Ratio) %>%
+      pivot_longer(cols = c("NormalizedCalc", "Normalized"), names_to = "Data Type", values_to = "Chondrite Normalized")
     return(list(data_long, data))
+  })
 
+  modelled_data <- reactive({
+    data <- norm_table()[[2]] %>%  pivot_wider(id_cols = 'rowid', names_from = 'Element_name', names_prefix = 'Ratio_', values_from = 'Ratio')
+    data <- left_join(corrected_data(),data,by ='rowid') %>%
+      relocate(
+        rowid, model_nree,
+        R.squared,
+        adj.R.squared,
+        Intercept,
+        Slope,
+        REE_plus_Y_Elements,
+        matches("_Normalized$"), matches("^ppmCalc_"), matches("^NormalizedCalc_"), matches("^Ratio_")
+      )
   })
 
 
@@ -172,93 +337,208 @@ server <- function(input, output) {
   output$Rees <- renderText({
     paste("Excluded from model:", paste(" ", REE_plus_Y_Elements[REE_plus_Y_Elements %notin% input$NormalizeMethod], collapse = " , "))
   })
+  ### Tables ###############
 
   ####### render reactable with all the data ##############
 
   output$Result <- renderReactable({
     data <- modelled_data()
+
     if (input$include_norm_values == FALSE) {
       data <- data %>% select(!matches("^NormalizedCalc|Normalized"))
     }
+    # if (input$impute) {
+    #   data <- data %>% impute_REE()
+    # }
 
-    if (input$impute) {
-      data <- data %>% impute_REE()
-    }
-
-    reactable(data,
+    reactable(data %>%  select(-dplyr::last_col(15):-last_col()),
+      defaultPageSize = 25,
+      resizable = T,
+      showPageSizeOptions = T,
       defaultColDef = colDef(format = reactable::colFormat(digits = 3)),
       columns = list(
-      rowid =  colDef(name = 'ID', format = colFormat(digits = 0))
-      ),
+        rowid = colDef(name = "ID", format = colFormat(digits = 0))
 
-      resizable = T,
-      searchable = T,
+      ),
       highlight = T,
       onClick = "select",
       selection = "single",
+      filterable = T,
       defaultSelected = 1,
-
+      theme = reactablefmtr::flatly()
     )
   })
 
-####### summary table #########
-  output$REE <- renderTable({
-
-      req(getReactableState("Result")$selected)
-      id_num <- getReactableState("Result")$selected
+  ####### summary table #########
+  output$REE <- renderReactable({
+    req(getReactableState("Result")$selected)
+    id_num <- getReactableState("Result")$selected
 
     # req(getReactableState("Result")$selected)
 
 
-    norm_table()[[2]] %>% filter(rowid == id_num)
+    data <- norm_table()[[2]] %>% filter(rowid == id_num)
+    reactable(data,
+              resizable = T,
+      # showPageSizeOptions = T,
+      # defaultPageSize = 8,
+      defaultColDef = colDef(format = reactable::colFormat(digits = 3)),
+      highlight = T,
+      theme = reactablefmtr::flatly(),
+      columns = list(
+        rowid = colDef(name = "ID", format = colFormat(digits = 0))
+      ),
+    )
   })
 
-# Plots ######
+
+  output$ratio_table <- renderReactable({
+    data <- norm_table()[[2]] %>%  arrange(desc(`Ionic Radius`))
+    data <- data %>%
+      select(Element_name, Ratio) %>%
+      group_by(Element_name) %>%
+      summarize(mean = mean(Ratio,na.rm = T),
+                sd = sd(Ratio,na.rm = T),
+                median = median(Ratio,na.rm = T),
+                IQR = IQR(Ratio,na.rm = T),
+                MAD = mad(Ratio,na.rm = T)) %>%
+      imputeREE:::add_IonicRadii() %>%
+      arrange(desc(ShannonRadiiVIII_Coord_3plus)) %>%
+      select(-ShannonRadiiVIII_Coord_3plus)
+
+    reactable(data ,
+              pagination = F,
+              highlight = T,
+
+              defaultColDef = colDef(format = reactable::colFormat(digits = 3)),
+              theme = flatly())
+  })
+
+  # Plots ######
 
 
   output$REE_plot <- renderPlot({
+
     breaks <- imputeREE::Element_Data %>% filter(Element_name %in% REE_plus_Y_Elements)
     labels <- breaks$Element_name
     breaks <- breaks$ShannonRadiiVIII_Coord_3plus
     req(getReactableState("Result")$selected)
 
-      id_num <- getReactableState("Result")$selected
+    id_num <- getReactableState("Result")$selected
+    data <- norm_table()[[1]]
 
-    norm_table()[[1]] %>% filter(rowid == id_num) %>%
+
+
+    if (input$hide_original) {
+      data <- data %>% filter(`Data Type` != "Normalized")
+    }
+    if (input$hide_calculated) {
+      data <- data %>% filter(`Data Type` != "NormalizedCalc")
+    }
+
+    if (input$complete_lines) {
+      data <- data %>% filter(!is.na(`Chondrite Normalized`))
+    }
+
+
+    if (input$strain) {
+      data <- data %>% mutate(`Ionic Radius` = (`Ionic Radius` / 3 + 0.84 / 6) * (`Ionic Radius` - 0.84)^2)
+      breaks <- (breaks / 3 + 0.84 / 6) * (breaks - 0.84)^2
+    }
+
+    data %>%
+      filter(rowid == id_num) %>%
       ggplot(aes(x = `Ionic Radius`, y = `Chondrite Normalized`, group = `Data Type`, color = `Data Type`)) +
-      theme(legend.position = c(0.95,0.05),
-            legend.justification = c(0.95,0.05)) +
-      geom_point() + geom_line() +
-      scale_y_log10() +
-      scale_x_reverse(breaks = breaks, labels = labels)
+      {
+        if (input$strain) xlab("ri/3 + r0/6)*(ri-r0)^2")
+      } +
+      # theme_bw(base_size = 15) +
+      theme(
+        legend.position = c(0.95, 0.05),
+        legend.justification = c(0.95, 0.05)
+      ) +
+      {
+        if (input$hide_legend) theme(legend.position = "none")
+      } +
+      geom_point(size = 3) +
+      geom_line() +
+      scale_y_log10(
+        # labels = scales::label_number(accuracy = 0.00001)
+      )+
+      scale_x_reverse(breaks = breaks, labels = labels, minor_breaks = NULL)
   })
 
-###### Rsquared Histogram
+  ###### Rsquared Histogram
   output$R2_plot <- renderPlot({
-    modelled_data() %>% ggplot(aes(model_r.squared)) +
+    var <- "R.squared"
+    if (input$AdjustedR2) {
+      var <- "adj.R.squared"
+    }
+
+
+    modelled_data() %>%
+      ggplot(aes_string(var)) +
       geom_histogram() +
-      geom_density() +
+      {
+        if (!input$hide_reference_line) geom_vline(xintercept = input$reference_line_R2)
+      } +
       scale_x_continuous(trans = "logit")
   })
 
+
+  #### Ratio_plots
   output$ratio_plot <- renderPlot({
-    norm_table()[[2]] %>%  ggplot(aes(y = Ratio, x = Element_name)) + geom_boxplot() + scale_y_log10()
+    breaks <- imputeREE::Element_Data %>% filter(Element_name %in% REE_plus_Y_Elements)
+    labels <- breaks$Element_name
+    breaks <- breaks$ShannonRadiiVIII_Coord_3plus
+
+
+
+
+    norm_table()[[2]] %>%  filter(R.squared > input$rsquared_filter) %>%
+      arrange(desc(`Ionic Radius`)) %>%
+      ggplot(aes(y = Ratio, x = forcats::fct_inorder(Element_name))) +
+      geom_boxplot(
+        # aes(fill = forcats::fct_inorder(Element_name))
+        ) +
+      geom_hline(yintercept = 1, lty = 2, alpha = 0.8)+
+      # scale_fill_viridis_d() +
+      theme(legend.position = 'none')+
+      scale_y_log10(
+        # labels = scales::label_number(accuracy = 0.00001)
+        )
   })
 
 
-#### downloads ####
+  download_data <- reactive(
+    {
+      data <- modelled_data()
+      if (input$include_norm_values == FALSE) {
+        data <- data %>% select(!matches("^NormalizedCalc|Normalized"))
+      }
+      if (input$impute) {
+        data <- data %>% impute_REE()
+      }
+      return(data)
+    }
+  )
+
+  #### downloads ####
 
   output$donwload_data <- downloadHandler(
+
+
     filename = function() {
       paste0(input$dataset, "calc.csv")
     },
     content = function(file) {
-      write.csv(modelled_data(), file)
+      write.csv(download_data(), file)
     }
   )
+
 
 
 }
 
 # Run the application
-shinyApp(ui = ui , server = server)
+shinyApp(ui = ui, server = server)
