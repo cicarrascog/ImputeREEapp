@@ -84,6 +84,13 @@ body <- dashboardBody(
             HTML('Selected elements are used for modelling. '),
             textOutput("Rees"),
             p(""),
+            radioButtons(
+              inputId = "method",
+              label = "Method",
+              choices = c(
+                `Carrasco-Godoy and Campbell (2023)` = 1,
+                `Zhong et al. (2019)` = 2
+              )),
             checkboxGroupInput(
               inputId = "NormalizeMethod",
               label = "Chondrite Values",
@@ -312,11 +319,11 @@ server <- function(input, output) {
     }
 
 
-    normalized_data <- data %>% imputeREE:::Element_norm(method = !!sym(input$chondrite_values))
+    normalized_data <- data %>% imputeREE:::Element_norm(chondrite = !!sym(input$chondrite_values))
     ### Model Section Data ------
     withProgress(
       message = "Fitting Models",
-      data <- data %>% model_REE(., exclude = REE_to_model, method = !!sym(input$chondrite_values), correct_heavy = F)
+      data <- data %>% model_REE(., exclude = REE_to_model, chondrite = !!sym(input$chondrite_values), correct_heavy = F, method = input$method)
     )
 
     complete_data <- left_join(data, normalized_data, by = "rowid") %>%
