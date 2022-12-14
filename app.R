@@ -98,7 +98,15 @@ body <- dashboardBody(
               choices = REE_plus_Y_Elements,
               selected = REE_plus_Y_Elements[REE_plus_Y_Elements %notin%
                                                c("La", "Ce", "Eu", "Y")]
-            )
+            ),
+            shiny::numericInput(
+              inputId = "R0",
+              label = "r0",
+              value = 0.84,
+              step = 0.01
+              )
+
+
         )
         ## here another box
       ),
@@ -323,7 +331,7 @@ server <- function(input, output) {
     ### Model Section Data ------
     withProgress(
       message = "Fitting Models",
-      data <- data %>% model_REE(., exclude = REE_to_model, chondrite = !!sym(input$chondrite_values), correct_heavy = F, method = input$method)
+      data <- data %>% model_REE(., exclude = REE_to_model, chondrite = !!sym(input$chondrite_values), correct_heavy = F, method = input$method, r0 = input$R0)
     )
 
     complete_data <- left_join(data, normalized_data, by = "rowid") %>%
@@ -551,7 +559,7 @@ server <- function(input, output) {
       {
         if (!input$hide_reference_line) geom_vline(xintercept = input$reference_line_R2)
       } +
-      scale_x_continuous(trans = "logit")
+      scale_x_continuous(trans = "logit", breaks = c(0.5,0.9,0.95,0.99,0.999))
   })
 
 
@@ -565,11 +573,13 @@ server <- function(input, output) {
 
 
     norm_table()[[2]] %>%  filter(R.squared > input$rsquared_filter) %>%
+      # filter(Element_name %in% REE_Elements[-c(1,2,3,6)]) %>%
       arrange(desc(`Ionic Radius`)) %>%
       ggplot(aes(y = Ratio, x = forcats::fct_inorder(Element_name))) +
       geom_boxplot(
         # aes(fill = forcats::fct_inorder(Element_name))
       ) +
+      xlab('Element') +
       geom_hline(yintercept = 1, lty = 2, alpha = 0.8)+
       # scale_fill_viridis_d() +
       theme(legend.position = 'none')+
