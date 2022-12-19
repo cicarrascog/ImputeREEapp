@@ -157,18 +157,18 @@ body <- dashboardBody(
 
             #### Correction Factor Sliders -----------
             HTML("This sliders are correction factors to accound for differences between measured and calculated values."),
-            sliderInput(inputId = "Pr", label = "Pr correction", value = 1/0.918503242748121, min = 0.1, max = 2),
-            sliderInput(inputId = "Nd", label = "Nd correction", value = 1/0.964163780696138 , min = 0.1, max = 2),
-            sliderInput(inputId = "Sm", label = "Sm correction", value = 1/1.03474021036956 , min = 0.1, max = 2),
-            sliderInput(inputId = "Gd", label = "Gd correction", value = 1/1.08353863509898, min = 0.1, max = 2),
-            sliderInput(inputId = "Tb", label = "Tb correction", value =  1/1.12453248979803 , min = 0.1, max = 2),
-            sliderInput(inputId = "Dy", label = "Dy correction", value = 1/1.13717202794484 , min = 0.1, max = 2),
-            sliderInput(inputId = "Ho", label = "Ho correction", value = 1/1.06914181064329, min = 0.1, max = 2),
-            sliderInput(inputId = "Er", label = "Er correction", value = 1/0.982456334111282 , min = 0.1, max = 2),
-            sliderInput(inputId = "Tm", label = "Tm correction", value = 1/0.973645612359077 , min = 0.1, max = 2),
-            sliderInput(inputId = "Yb", label = "Yb correction", value = 1/0.848963529664848 , min = 0.1, max = 2),
-            sliderInput(inputId = "Lu", label = "Lu correction", value = 1/0.774442796976892 , min = 0.1, max = 2),
-            sliderInput(inputId = "Y", label = "Y correction", value = 1/0.713075166441028, min = 0.1, max = 2),
+            sliderInput(inputId = "Pr", label = "Pr correction", value = 1/1, min = 0.1, max = 2),
+            sliderInput(inputId = "Nd", label = "Nd correction", value = 1/1 , min = 0.1, max = 2),
+            sliderInput(inputId = "Sm", label = "Sm correction", value = 1/1 , min = 0.1, max = 2),
+            sliderInput(inputId = "Gd", label = "Gd correction", value = 1/1, min = 0.1, max = 2),
+            sliderInput(inputId = "Tb", label = "Tb correction", value =  1/1 , min = 0.1, max = 2),
+            sliderInput(inputId = "Dy", label = "Dy correction", value = 1/1 , min = 0.1, max = 2),
+            sliderInput(inputId = "Ho", label = "Ho correction", value = 1/1, min = 0.1, max = 2),
+            sliderInput(inputId = "Er", label = "Er correction", value = 1/1 , min = 0.1, max = 2),
+            sliderInput(inputId = "Tm", label = "Tm correction", value = 1/1 , min = 0.1, max = 2),
+            sliderInput(inputId = "Yb", label = "Yb correction", value = 1/1 , min = 0.1, max = 2),
+            sliderInput(inputId = "Lu", label = "Lu correction", value = 1/1 , min = 0.1, max = 2),
+            sliderInput(inputId = "Y", label = "Y correction", value = 1/1, min = 0.1, max = 2),
 
 
 
