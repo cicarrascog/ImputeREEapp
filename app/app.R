@@ -88,7 +88,8 @@ body <- dashboardBody(
               inputId = "method",
               label = "Method",
               choices = c(
-                `Carrasco-Godoy and Campbell (2023)` = 1,
+                `Chondrite-Onuma` = 3,
+                `Chondrite-Lattice` = 1,
                 `Zhong et al. (2019)` = 2
               )),
             checkboxGroupInput(
@@ -331,16 +332,30 @@ server <- function(input, output) {
     ### Model Section Data ------
     withProgress(
       message = "Fitting Models",
-      data <- data %>% model_REE(., exclude = REE_to_model, chondrite = !!sym(input$chondrite_values), correct_heavy = F, method = input$method, r0 = input$R0)
+      data <- data %>% model_REE(., exclude = REE_to_model, chondrite = !!sym(input$chondrite_values), Calibrate = F, method = input$method, r0 = input$R0)
     )
+### HERE A CONDITIONAL FOR CHONDRITE ONUMA METHOD
 
-    complete_data <- left_join(data, normalized_data, by = "rowid") %>%
-      rename(
-        `R.squared` = model_r.squared,
-        `adj.R.squared` = model_adj.r.squared,
-        `Intercept` = estimate_Intercept,
-        `Slope` = estimate_Slope,
-      )
+    if (input$method == 3) {
+      complete_data <- left_join(data, normalized_data, by = "rowid") %>%
+        rename(
+          `R.squared` = model_r.squared,
+          `adj.R.squared` = model_adj.r.squared
+          # `Intercept` = estimate_Intercept,
+          # `Slope` = estimate_Slope,
+        )
+    } else{
+      complete_data <- left_join(data, normalized_data, by = "rowid") %>%
+        rename(
+          `R.squared` = model_r.squared,
+          `adj.R.squared` = model_adj.r.squared,
+          `Intercept` = estimate_Intercept,
+          `Slope` = estimate_Slope,
+        )
+    }
+
+
+
 
     return(complete_data)
   })
@@ -393,6 +408,8 @@ server <- function(input, output) {
     data <- norm_table()[[2]] %>%
       pivot_wider(id_cols = 'rowid', names_from = 'Element_name', names_prefix = 'Ratio_', values_from = 'Ratio')
 
+  ### HERE ANOTHER CONDITIONAL FOR METHOD
+
     data <- left_join(corrected_data(),data,by ='rowid') %>%
       mutate(`Ce/Ce*` = Ce/ppmCalc_Ce ,
       `Eu/Eu*` = Eu/ppmCalc_Eu ) %>%
@@ -400,8 +417,8 @@ server <- function(input, output) {
         rowid, model_nree,
         R.squared,
         adj.R.squared,
-        Intercept,
-        Slope,
+        # Intercept,
+        # Slope,
         `Ce/Ce*`,
         `Eu/Eu*`,
         REE_plus_Y_Elements,
