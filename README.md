@@ -11,7 +11,7 @@ R](https://github.com/cicarrascog/imputeREE). It allows the imputation
 of missing REE data and calculate Ce and Eu anomalies on magmatic zircon
 based on the Chondrite-Onuma and Chondrite-Lattice methods of
 [Carrasco-Godoy and Campbell
-(2023)](https://link.springer.com/article/10.1007/s00710-019-00682-y)
+(2023)](https://link.springer.com/article/10.1007/s00410-023-02025-9)
 and the logarithmic regression from [Zhong et al.
 (2019)](https://link.springer.com/article/10.1007/s00710-019-00682-y).
 

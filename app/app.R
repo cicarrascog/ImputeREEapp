@@ -39,6 +39,7 @@ sidebar <- dashboardSidebar(
     menuItem(text = "Download", tabName = "Download"),
     menuItem(text = "References", tabName = "References"),
     menuItem(text = "Changelog", tabName = "Changelog"),
+    menuItem(text = "License", tabName = "License"),
     menuItem(text = "Contact", tabName = "Contact")
   )
 )
@@ -99,13 +100,7 @@ body <- dashboardBody(
               choices = REE_plus_Y_Elements,
               selected = REE_plus_Y_Elements[REE_plus_Y_Elements %notin%
                                                c("La", "Ce", "Eu", "Y")]
-            ),
-            shiny::numericInput(
-              inputId = "R0",
-              label = "r0",
-              value = 0.84,
-              step = 0.01
-              )
+            )
 
 
         )
@@ -158,18 +153,18 @@ body <- dashboardBody(
 
             #### Correction Factor Sliders -----------
             HTML("This sliders are correction factors to accound for differences between measured and calculated values."),
-            sliderInput(inputId = "Pr", label = "Pr correction", value = 1/1, min = 0.1, max = 2),
+            sliderInput(inputId = "Pr", label = "Pr correction", value = 1/1 , min = 0.1, max = 2),
             sliderInput(inputId = "Nd", label = "Nd correction", value = 1/1 , min = 0.1, max = 2),
             sliderInput(inputId = "Sm", label = "Sm correction", value = 1/1 , min = 0.1, max = 2),
-            sliderInput(inputId = "Gd", label = "Gd correction", value = 1/1, min = 0.1, max = 2),
-            sliderInput(inputId = "Tb", label = "Tb correction", value =  1/1 , min = 0.1, max = 2),
+            sliderInput(inputId = "Gd", label = "Gd correction", value = 1/1 , min = 0.1, max = 2),
+            sliderInput(inputId = "Tb", label = "Tb correction", value = 1/1 , min = 0.1, max = 2),
             sliderInput(inputId = "Dy", label = "Dy correction", value = 1/1 , min = 0.1, max = 2),
-            sliderInput(inputId = "Ho", label = "Ho correction", value = 1/1, min = 0.1, max = 2),
+            sliderInput(inputId = "Ho", label = "Ho correction", value = 1/1 , min = 0.1, max = 2),
             sliderInput(inputId = "Er", label = "Er correction", value = 1/1 , min = 0.1, max = 2),
             sliderInput(inputId = "Tm", label = "Tm correction", value = 1/1 , min = 0.1, max = 2),
             sliderInput(inputId = "Yb", label = "Yb correction", value = 1/1 , min = 0.1, max = 2),
             sliderInput(inputId = "Lu", label = "Lu correction", value = 1/1 , min = 0.1, max = 2),
-            sliderInput(inputId = "Y", label = "Y correction", value = 1/1, min = 0.1, max = 2),
+            sliderInput(inputId =   "Y", label = "Y correction", value = 1/1 , min = 0.1, max = 2),
 
 
 
@@ -263,6 +258,10 @@ body <- dashboardBody(
       tabName = "References",
       box(includeMarkdown('Reference.md'), width = 9)
     ),
+    tabItem(
+      tabName = "License",
+      box(includeMarkdown("License.md"), width = 8)
+    ),
     ### Changelog Tab ------
     tabItem(
       tabName = "Changelog",
@@ -291,7 +290,7 @@ server <- function(input, output) {
 
   ## Load Testing data ------
   sample_data <- reactive({
-    testing_data %>%
+    Ballard_et_al_Zircon %>%
       # slice(1:500) %>%
       select(matches(paste0("Zr_", REE_plus_Y_Elements, "_ppm")),Zr_P_ppm) %>%
       rename_with(~ str_remove_all(.x, "^Zr_|_ppm$"))
@@ -329,11 +328,46 @@ server <- function(input, output) {
 
 
     normalized_data <- data %>% imputeREE:::Element_norm(chondrite = !!sym(input$chondrite_values))
+
     ### Model Section Data ------
+    if (input$method == 1){
     withProgress(
       message = "Fitting Models",
-      data <- data %>% model_REE(., exclude = REE_to_model, chondrite = !!sym(input$chondrite_values), Calibrate = F, method = input$method, r0 = input$R0)
+
+          data <- data %>%
+            modelChondrite_lattice(.,
+                                   exclude = REE_to_model,
+                                   chondrite = !!sym(input$chondrite_values),
+                                   Calibrate = T)
+
+
+
     )
+      }
+
+    ### Here conditional for the three methods
+    withProgress(
+      message = "Fitting Models",
+      if (input$method == 2){
+        data <- data %>%
+          modelZhong(.,
+                     exclude = REE_to_model,
+                     chondrite = !!sym(input$chondrite_values))
+
+      })
+
+    withProgress(
+      message = "Fitting Models",
+      if (input$method == 3){
+        data <- data %>%
+          modelChondrite_Onuma(.,
+                               exclude = REE_to_model,
+                               chondrite = !!sym(input$chondrite_values),
+                               Calibrate = T)
+
+      })
+
+
 ### HERE A CONDITIONAL FOR CHONDRITE ONUMA METHOD
 
     if (input$method == 3) {
