@@ -102,7 +102,7 @@ body <- dashboardBody(
             inline = T,
             choices = REE_plus_Y_Elements,
             selected = REE_plus_Y_Elements[REE_plus_Y_Elements %notin%
-                                             c("La", "Ce", "Eu", "Y")]
+            c("La", "Ce", "Pr", "Eu", "Y")]
           )
         )
         ## here another box
