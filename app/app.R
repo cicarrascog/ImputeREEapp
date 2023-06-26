@@ -6,7 +6,7 @@
 #
 #    http://shiny.rstudio.com/
 #
-options(scipen=100000)
+options(scipen = 100000)
 library(shiny)
 library(tidyverse)
 library(imputeREE)
@@ -49,66 +49,67 @@ body <- dashboardBody(
     ### Instruction Tab ------
     tabItem(
       tabName = "Instructions",
-      box(includeMarkdown("Instructions.md"), width = 8)
+      box(includeMarkdown("Instructions.md"), width = 10, collapsible = F)
     ),
     ### Upload Tab ------
     tabItem(
       tabName = "Upload",
       fluidRow(
-        box(title = HTML('<b>Upload</b>'),
-            width = 5,
-            headerBorder = F,
-            collapsible = F,
-            solidHeader = T,
-            label = boxLabel(text = "Help", status = "info", tooltip = "Upload a CSV file"),
-            fileInput(
-              inputId = "newFile",
-              label = NULL,
-              accept = c(".csv"),
-              buttonLabel = "Upload...",
-              placeholder = "a .csv file"
-            ),
-            radioButtons(
-              inputId = "chondrite_values",
-              label = "Chondrite Values",
-              choices = c(
-                `Palme and O'Neill (2014)` = "PalmeOneill2014CI",
-                `McDonough and Sun (1995)` = "McDonough1995CI"
-              )
+        box(
+          title = HTML("<b>Upload</b>"),
+          width = 5,
+          headerBorder = F,
+          collapsible = F,
+          solidHeader = T,
+          label = boxLabel(text = "Help", status = "info", tooltip = "Upload a CSV file"),
+          fileInput(
+            inputId = "newFile",
+            label = NULL,
+            accept = c(".csv"),
+            buttonLabel = "Upload...",
+            placeholder = "a .csv file"
+          ),
+          radioButtons(
+            inputId = "chondrite_values",
+            label = "Chondrite Values",
+            choices = c(
+              `Palme and O'Neill (2014)` = "PalmeOneill2014CI",
+              `McDonough and Sun (1995)` = "McDonough1995CI"
             )
+          )
         ),
-        box(title = HTML('<b>Model variables</b>'),
-            width = 7,
-            headerBorder = F,
-            collapsible = F,
-            solidHeader = T,
-            HTML('Selected elements are used for modelling. '),
-            textOutput("Rees"),
-            p(""),
-            radioButtons(
-              inputId = "method",
-              label = "Method",
-              choices = c(
-                `Chondrite-Onuma` = 3,
-                `Chondrite-Lattice` = 1,
-                `Zhong et al. (2019)` = 2
-              )),
-            checkboxGroupInput(
-              inputId = "NormalizeMethod",
-              label = "Chondrite Values",
-              inline = T,
-              choices = REE_plus_Y_Elements,
-              selected = REE_plus_Y_Elements[REE_plus_Y_Elements %notin%
-                                               c("La", "Ce", "Eu", "Y")]
+        box(
+          title = HTML("<b>Model variables</b>"),
+          width = 7,
+          headerBorder = F,
+          collapsible = F,
+          solidHeader = T,
+          HTML("Selected elements are used for modelling. "),
+          textOutput("Rees"),
+          p(""),
+          radioButtons(
+            inputId = "method",
+            label = "Method",
+            choices = c(
+              `Chondrite-Onuma` = 3,
+              `Chondrite-Lattice` = 1,
+              `Zhong et al. (2019)` = 2
             )
-
-
+          ),
+          checkboxGroupInput(
+            inputId = "NormalizeMethod",
+            label = "Chondrite Values",
+            inline = T,
+            choices = REE_plus_Y_Elements,
+            selected = REE_plus_Y_Elements[REE_plus_Y_Elements %notin%
+                                             c("La", "Ce", "Eu", "Y")]
+          )
         )
         ## here another box
       ),
       fluidRow(
         box(
-          title = HTML('<b>R<sup>2</sup> plot</b>'),
+          title = HTML("<b>R<sup>2</sup> plot</b>"),
           plotOutput("R2_plot"),
           headerBorder = F,
           collapsible = F,
@@ -134,7 +135,7 @@ body <- dashboardBody(
           )
         ),
         box(
-          title = HTML('<b>Ratio Boxplot</b>'),
+          title = HTML("<b>Ratio Boxplot</b>"),
           plotOutput("ratio_plot"),
           headerBorder = F,
           collapsible = F,
@@ -153,124 +154,138 @@ body <- dashboardBody(
 
             #### Correction Factor Sliders -----------
             HTML("This sliders are correction factors to accound for differences between measured and calculated values."),
-            sliderInput(inputId = "Pr", label = "Pr correction", value = 1/1 , min = 0.1, max = 2),
-            sliderInput(inputId = "Nd", label = "Nd correction", value = 1/1 , min = 0.1, max = 2),
-            sliderInput(inputId = "Sm", label = "Sm correction", value = 1/1 , min = 0.1, max = 2),
-            sliderInput(inputId = "Gd", label = "Gd correction", value = 1/1 , min = 0.1, max = 2),
-            sliderInput(inputId = "Tb", label = "Tb correction", value = 1/1 , min = 0.1, max = 2),
-            sliderInput(inputId = "Dy", label = "Dy correction", value = 1/1 , min = 0.1, max = 2),
-            sliderInput(inputId = "Ho", label = "Ho correction", value = 1/1 , min = 0.1, max = 2),
-            sliderInput(inputId = "Er", label = "Er correction", value = 1/1 , min = 0.1, max = 2),
-            sliderInput(inputId = "Tm", label = "Tm correction", value = 1/1 , min = 0.1, max = 2),
-            sliderInput(inputId = "Yb", label = "Yb correction", value = 1/1 , min = 0.1, max = 2),
-            sliderInput(inputId = "Lu", label = "Lu correction", value = 1/1 , min = 0.1, max = 2),
-            sliderInput(inputId =   "Y", label = "Y correction", value = 1/1 , min = 0.1, max = 2),
-
-
-
-
+            sliderInput(inputId = "Pr", label = "Pr correction", value = 1 / 1, min = 0.1, max = 2),
+            sliderInput(inputId = "Nd", label = "Nd correction", value = 1 / 1, min = 0.1, max = 2),
+            sliderInput(inputId = "Sm", label = "Sm correction", value = 1 / 1, min = 0.1, max = 2),
+            sliderInput(inputId = "Gd", label = "Gd correction", value = 1 / 1, min = 0.1, max = 2),
+            sliderInput(inputId = "Tb", label = "Tb correction", value = 1 / 1, min = 0.1, max = 2),
+            sliderInput(inputId = "Dy", label = "Dy correction", value = 1 / 1, min = 0.1, max = 2),
+            sliderInput(inputId = "Ho", label = "Ho correction", value = 1 / 1, min = 0.1, max = 2),
+            sliderInput(inputId = "Er", label = "Er correction", value = 1 / 1, min = 0.1, max = 2),
+            sliderInput(inputId = "Tm", label = "Tm correction", value = 1 / 1, min = 0.1, max = 2),
+            sliderInput(inputId = "Yb", label = "Yb correction", value = 1 / 1, min = 0.1, max = 2),
+            sliderInput(inputId = "Lu", label = "Lu correction", value = 1 / 1, min = 0.1, max = 2),
+            sliderInput(inputId = "Y", label = "Y correction", value = 1 / 1, min = 0.1, max = 2),
           )
         ) ## here another box
-      ) ,
+      ),
       fluidRow(
-        box(title = HTML('<b>Summary statistics</b>'),
-            width = 12,
-            reactableOutput('ratio_table')
+        box(
+          title = HTML("<b>Summary statistics</b>"),
+          width = 12,
+          reactableOutput("ratio_table")
         )
-      )## here another fluidrow
+      ) ## here another fluidrow
     ),
     ### Data Tab ------
     tabItem(
       tabName = "Data",
-      fluidRow(
-        box(
-          headerBorder = F,
-          collapsible = F,
-          solidHeader = T,
-          plotOutput("REE_plot"),
-          sidebar = boxSidebar(
-            id = "Strain_check",
-            checkboxInput(inputId = "strain", label = "Use lattice strain expression?", value = F),
-            checkboxInput(inputId = "complete_lines", label = "Complete pattern when data is missing?", value = F),
-            checkboxInput(inputId = "hide_original", label = "Hide Original", value = F),
-            checkboxInput(inputId = "hide_calculated", label = "Hide Calculated", value = F),
-            checkboxInput(inputId = "hide_legend", label = "Hide Legend", value = F)
+      #### plot and table ------------
+      fluidPage(
+        sidebarLayout(
+          sidebarPanel(
+            box(
+              width = 12,
+              headerBorder = F,
+              collapsible = F,
+              solidHeader = T,
+              plotOutput("REE_plot"),
+              sidebar = boxSidebar(
+                id = "Strain_check",
+                checkboxInput(inputId = "strain", label = "Use misfit expression?", value = F),
+                checkboxInput(inputId = "complete_lines", label = "Complete pattern when data is missing?", value = F),
+                checkboxInput(inputId = "hide_original", label = "Hide Original", value = F),
+                checkboxInput(inputId = "hide_calculated", label = "Hide Calculated", value = F),
+                checkboxInput(inputId = "hide_legend", label = "Hide Legend", value = F),
+                shiny::numericInput(inputId = "min_plot_value", value = NULL, label = "min y axis"),
+                shiny::numericInput(inputId = "max_plot_value", value = NULL, label = "max y axis"),
+              )),
+            #### scatter plot-------------
+            box(width = 12,
+                title = 'scatterplots',
+                html('Click the gear symbol to select variables'),
+                headerBorder = F,
+                collapsible = F,
+                solidHeader = F,
+                plotly::plotlyOutput("scatterplot"),
+                sidebar = bs4CardSidebar(
+                  #   startOpen = T,
+                  id = "scatterplot_setup",
+                  uiOutput('scatterycol'),
+                  uiOutput('scatterxcol'),
+                  checkboxInput(inputId = "scatter_log_y", label = "log y", value = F),
+                  checkboxInput(inputId = "scatter_log_x", label = "log x", value = F),
+                  #
+                ))),
+          mainPanel(box(
+            width = 12,
+            reactableOutput("Result")
           )
-        ),
-        box(
-          headerBorder = F,
-          collapsible = F,
-          solidHeader = T,
-          reactableOutput("REE")
-        )
-      ),
-      fluidRow(
-        box(
-          rightBorder = F,
-          headerBorder = F,
-          collapsible = F,
-          solidHeader = T,
-          reactableOutput("Result"), width = 12
+
+          )
         )
       )
     ),
+
+
+
     ### Download Tab ------
     tabItem(
       tabName = "Download",
-      HTML('<h2>Description of Downloaded Data to be added</h2>'),
-      box(title = HTML('<h3>Impute Values?</h3>'),
-          HTML('Ticking this option will add a column for each REE in the format <code>Imputed_REEname</code>,
-             where missing values are replaced for those calculated from this regression. Measured values are kept.'),
-          HTML('The R<sup>2</sup> slider, allows to set a threshold for imputation. Models with a fitting lower than the threshold are not imputed'),
-          sliderInput(inputId = 'R_filter_export',label = HTML("R<sup>2</sup> filter"), value = 0.9, min = 0.01, max = 1,step = 0.01  ),
-          tooltip(
-            title = "Should imputed values be included in the Output?",
-            placement = "right",
-            tag = checkboxInput(
-              inputId = "impute",
-              label = "Impute?",
-              value = FALSE
-            )
-          )
-
-      ),
-      box(title = HTML('<h3>Include Chondrite nomalized values?</h3>'),
-          HTML('Ticking this option will add a column for each REE in the format <code>Normalized_REEname</code> and <code>NormalizedCalc_REEname</code> to include the Chondrite normalized values using measured and calculated concentrations, respectively.'),
-
+      HTML("<h2>Description of Downloaded Data to be added</h2>"),
+      fluidRow(box(
+        title = HTML("<h3>Impute Values?</h3>"),
+        HTML("Ticking this option will add a column for each REE in the format <code>Imputed_REEname</code>,
+             where missing values are replaced for those calculated from this regression. Measured values are kept."),
+        HTML("The R<sup>2</sup> slider, allows to set a threshold for imputation. Models with a fitting lower than the threshold are not imputed"),
+        sliderInput(inputId = "R_filter_export", label = HTML("R<sup>2</sup> filter"), value = 0.99, min = 0.9, max = 1, step = 0.001),
         tooltip(
-        title = "Should Chondrite normalized values be included in the Output?",
-        placement = "right",
-        tag = checkboxInput(
-          inputId = "include_norm_values",
-          label = "Include Chondrite Normalized Values?",
-          value = FALSE
-        ))
-
+          title = "Should imputed values be included in the Output?",
+          placement = "right",
+          tag = checkboxInput(
+            inputId = "impute",
+            label = "Impute?",
+            value = FALSE
+          )
+        )
       ),
-
-      box(Title = HTML('<h2>Click below to download</h2>'),
+      box(
+        title = HTML("<h3>Include Chondrite nomalized values?</h3>"),
+        HTML("Ticking this option will add a column for each REE in the format <code>Normalized_REEname</code> and <code>NormalizedCalc_REEname</code> to include the Chondrite normalized values using measured and calculated concentrations, respectively."),
+        tooltip(
+          title = "Should Chondrite normalized values be included in the Output?",
+          placement = "right",
+          tag = checkboxInput(
+            inputId = "include_norm_values",
+            label = "Include Chondrite Normalized Values?",
+            value = FALSE
+          )
+        )
+      ))
+      ,
+      box(
+        Title = HTML("<h2>Click below to download</h2>"),
         downloadButton(outputId = "donwload_data")
       )
-
     ),
     ### References Tab ------
     tabItem(
       tabName = "References",
-      box(includeMarkdown('Reference.md'), width = 9)
+      box(includeMarkdown("Reference.md"), width = 9)
     ),
     tabItem(
       tabName = "License",
-      box(includeMarkdown("License.md"), width = 8)
+      box(includeMarkdown("license.md"), width = 8)
     ),
     ### Changelog Tab ------
     tabItem(
       tabName = "Changelog",
-      box(includeMarkdown('Changelog.md'), width = 9)
+      box(includeMarkdown("Changelog.md"), width = 9)
     ),
     tabItem(
       ### Contact Tab ------
       tabName = "Contact",
-      box(includeMarkdown('Contact.md'), width = 9)
+      box(includeMarkdown("Contact.md"), width = 9)
     )
   )
 )
@@ -292,7 +307,7 @@ server <- function(input, output) {
   sample_data <- reactive({
     Ballard_et_al_Zircon %>%
       # slice(1:500) %>%
-      select(matches(paste0("Zr_", REE_plus_Y_Elements, "_ppm")),Zr_P_ppm) %>%
+      select(matches(paste0("Zr_", REE_plus_Y_Elements, "_ppm")), Zr_P_ppm) %>%
       rename_with(~ str_remove_all(.x, "^Zr_|_ppm$"))
   })
 
@@ -300,8 +315,6 @@ server <- function(input, output) {
   ## Prepare Data ------
 
   base_data <- reactive({
-
-
     # req(input$newFile$datapath)
 
 
@@ -330,61 +343,61 @@ server <- function(input, output) {
     normalized_data <- data %>% imputeREE:::Element_norm(chondrite = !!sym(input$chondrite_values))
 
     ### Model Section Data ------
-    if (input$method == 1){
-    withProgress(
-      message = "Fitting Models",
-
-          data <- data %>%
-            modelChondrite_lattice(.,
-                                   exclude = REE_to_model,
-                                   chondrite = !!sym(input$chondrite_values),
-                                   Calibrate = T)
-
-
-
-    )
-      }
+    if (input$method == 1) {
+      withProgress(
+        message = "Fitting Models",
+        data <- data %>%
+          modelChondrite_lattice(.,
+                                 exclude = REE_to_model,
+                                 chondrite = !!sym(input$chondrite_values),
+                                 Calibrate = T
+          )
+      )
+    }
 
     ### Here conditional for the three methods
     withProgress(
       message = "Fitting Models",
-      if (input$method == 2){
+      if (input$method == 2) {
         data <- data %>%
           modelZhong(.,
                      exclude = REE_to_model,
-                     chondrite = !!sym(input$chondrite_values))
-
-      })
+                     chondrite = !!sym(input$chondrite_values)
+          )
+      }
+    )
 
     withProgress(
       message = "Fitting Models",
-      if (input$method == 3){
+      if (input$method == 3) {
         data <- data %>%
           modelChondrite_Onuma(.,
                                exclude = REE_to_model,
                                chondrite = !!sym(input$chondrite_values),
-                               Calibrate = T)
+                               Calibrate = T
+          )
+      }
+    )
 
-      })
 
-
-### HERE A CONDITIONAL FOR CHONDRITE ONUMA METHOD
+    ### HERE A CONDITIONAL FOR CHONDRITE ONUMA METHOD
 
     if (input$method == 3) {
       complete_data <- left_join(data, normalized_data, by = "rowid") %>%
         rename(
           `R.squared` = model_r.squared,
-          `adj.R.squared` = model_adj.r.squared
-          # `Intercept` = estimate_Intercept,
-          # `Slope` = estimate_Slope,
+          `adj.R.squared` = model_adj.r.squared,
+          `Intercept` = estimate_Intercept,
+          `a (parabola)` = estimate_X1,
+          `b (parabola)` = estimate_X2
         )
-    } else{
+    } else {
       complete_data <- left_join(data, normalized_data, by = "rowid") %>%
         rename(
           `R.squared` = model_r.squared,
           `adj.R.squared` = model_adj.r.squared,
           `Intercept` = estimate_Intercept,
-          `Slope` = estimate_Slope,
+          `Slope` = estimate_Slope
         )
     }
 
@@ -398,22 +411,23 @@ server <- function(input, output) {
 
   ## Apply Corrections  ------
   corrected_data <- reactive({
-    data <- base_data() %>% imputeREE:::correct_heavy(
-      Y_correction_fact = input$Y,
-      Yb_correction_fact = input$Yb,
-      Lu_correction_fact = input$Lu,
-      Ho_correction_fact = input$Ho,
-      Er_correction_fact = input$Er,
-      Tm_correction_fact = input$Tm
-  ) %>%  imputeREE:::correct_middle(
-    Nd_correction_fact = input$Nd,
-    Sm_correction_fact = input$Sm,
-    Gd_correction_fact = input$Gd,
-    Tb_correction_fact = input$Tb,
-    Dy_correction_fact = input$Dy,
-    Pr_correction_fact = input$Pr
-
-  )
+    data <- base_data() %>%
+      imputeREE:::correct_heavy(
+        Y_correction_fact = input$Y,
+        Yb_correction_fact = input$Yb,
+        Lu_correction_fact = input$Lu,
+        Ho_correction_fact = input$Ho,
+        Er_correction_fact = input$Er,
+        Tm_correction_fact = input$Tm
+      ) %>%
+      imputeREE:::correct_middle(
+        Nd_correction_fact = input$Nd,
+        Sm_correction_fact = input$Sm,
+        Gd_correction_fact = input$Gd,
+        Tb_correction_fact = input$Tb,
+        Dy_correction_fact = input$Dy,
+        Pr_correction_fact = input$Pr
+      )
 
     return(data)
   })
@@ -422,7 +436,7 @@ server <- function(input, output) {
 
   norm_table <- reactive({
     data <- corrected_data() %>%
-      select(rowid, `R.squared` , matches("Normalized")) %>%
+      select(rowid, `R.squared`, matches("Normalized")) %>%
       rename_with(.cols = matches("Normalized$"), ~ paste0("Normalized_", str_remove_all(.x, "_Normalized$"))) %>%
       pivot_longer(cols = matches("Normalized"), names_to = c(".value", "Element_name"), names_sep = "_") %>%
       imputeREE:::add_IonicRadii() %>%
@@ -436,22 +450,24 @@ server <- function(input, output) {
   })
 
 
-## This is the data used for the table that is shown in Data tab ----------------
+  ## This is the data used for the table that is shown in Data tab ----------------
 
   modelled_data <- reactive({
     data <- norm_table()[[2]] %>%
-      pivot_wider(id_cols = 'rowid', names_from = 'Element_name', names_prefix = 'Ratio_', values_from = 'Ratio')
+      pivot_wider(id_cols = "rowid", names_from = "Element_name", names_prefix = "Ratio_", values_from = "Ratio")
 
-  ### HERE ANOTHER CONDITIONAL FOR METHOD
+    ### HERE ANOTHER CONDITIONAL FOR METHOD
 
-    data <- left_join(corrected_data(),data,by ='rowid') %>%
-      mutate(`Ce/Ce*` = Ce/ppmCalc_Ce ,
-      `Eu/Eu*` = Eu/ppmCalc_Eu ) %>%
+    data <- left_join(corrected_data(), data, by = "rowid") %>%
+      mutate(
+        `Ce/Ce*` = Ce / ppmCalc_Ce,
+        `Eu/Eu*` = Eu / ppmCalc_Eu
+      ) %>%
       relocate(
         rowid, model_nree,
         R.squared,
         adj.R.squared,
-        # Intercept,
+        matches("Intercept|Slope|(parabola)"),
         # Slope,
         `Ce/Ce*`,
         `Eu/Eu*`,
@@ -475,18 +491,16 @@ server <- function(input, output) {
     if (input$include_norm_values == FALSE) {
       data <- data %>% select(!matches("^NormalizedCalc|Normalized"))
     }
-    # if (input$impute) {
-    #   data <- data %>% impute_REE()
-    # }
 
-    reactable(data %>%  select(-dplyr::last_col(15):-last_col()),
-              defaultPageSize = 25,
+
+    reactable(data %>%  select(!matches('model_.+$|std.error_.+$|statistic_.+$|p.value_.+$')),
+              # %>%  select(-dplyr::last_col(15):-last_col()),
+              defaultPageSize = 15,
               resizable = T,
               showPageSizeOptions = T,
               defaultColDef = colDef(format = reactable::colFormat(digits = 3)),
               columns = list(
                 rowid = colDef(name = "ID", format = colFormat(digits = 0))
-
               ),
               highlight = T,
               onClick = "select",
@@ -521,35 +535,38 @@ server <- function(input, output) {
 
 
   output$ratio_table <- renderReactable({
-    data <- norm_table()[[2]] %>%  arrange(desc(`Ionic Radius`))
+    data <- norm_table()[[2]] %>% arrange(desc(`Ionic Radius`))
     data <- data %>%
       select(Element_name, Ratio) %>%
       group_by(Element_name) %>%
-      summarize(mean = mean(Ratio,na.rm = T),
-                sd = sd(Ratio,na.rm = T),
-                median = median(Ratio,na.rm = T),
-                IQR = IQR(Ratio,na.rm = T),
-                MAD = mad(Ratio,na.rm = T)) %>%
+      summarize(
+        mean = mean(Ratio, na.rm = T),
+        sd = sd(Ratio, na.rm = T),
+        median = median(Ratio, na.rm = T),
+        IQR = IQR(Ratio, na.rm = T),
+        MAD = mad(Ratio, na.rm = T)
+      ) %>%
       imputeREE:::add_IonicRadii() %>%
       arrange(desc(ShannonRadiiVIII_Coord_3plus)) %>%
       select(-ShannonRadiiVIII_Coord_3plus)
 
-    reactable(data ,
+    reactable(data,
               pagination = F,
               highlight = T,
-
               defaultColDef = colDef(format = reactable::colFormat(digits = 3)),
-              theme = flatly())
+              theme = flatly()
+    )
   })
 
   # Plots ######
 
+  ### REE plot ##########
 
   output$REE_plot <- renderPlot({
-
     breaks <- imputeREE::Element_Data %>% filter(Element_name %in% REE_plus_Y_Elements)
     labels <- breaks$Element_name
     breaks <- breaks$ShannonRadiiVIII_Coord_3plus
+
     req(getReactableState("Result")$selected)
 
     id_num <- getReactableState("Result")$selected
@@ -591,12 +608,74 @@ server <- function(input, output) {
       geom_point(size = 3) +
       geom_line() +
       scale_y_log10(
+
         # labels = scales::label_number(accuracy = 0.00001)
-      )+
-      scale_x_reverse(breaks = breaks, labels = labels, minor_breaks = NULL)
+      ) +
+      scale_x_reverse(breaks = breaks, labels = labels, minor_breaks = NULL) +
+      coord_cartesian(ylim = c(input$min_plot_value, input$max_plot_value))
+
   })
 
-  ###### Rsquared Histogram
+
+
+  ### scatterpot ##########
+
+  output$scatterxcol <- renderUI({
+    data <- modelled_data()
+
+    if (input$include_norm_values == FALSE) {
+      data <- data %>% select(!matches("^NormalizedCalc|Normalized"))
+    }
+    data <- data %>%  select(!matches('model_.+$|std.error_.+$|statistic_.+$|p.value_.+$')) %>%
+      select(where(is.numeric))
+
+
+    choices <- names(data)
+
+    selectInput('xcol', 'X Variable', choices = choices , selected = 'La', multiple = F, selectize = T)
+
+  })
+
+  output$scatterycol <- renderUI({
+    data <- modelled_data()
+
+    if (input$include_norm_values == FALSE) {
+      data <- data %>% select(!matches("^NormalizedCalc|Normalized"))
+    }
+    data <- data %>%  select(!matches('model_.+$|std.error_.+$|statistic_.+$|p.value_.+$')) %>%
+      select(where(is.numeric))
+
+
+    choices <- names(data)
+
+    selectInput('ycol', 'Y Variable', choices = choices , selected = 'Pr', multiple = F, selectize = T)
+
+  })
+  # scatter_log_x
+  output$scatterplot <- plotly::renderPlotly({
+
+    data <- modelled_data()
+
+    if (input$include_norm_values == FALSE) {
+      data <- data %>% select(!matches("^NormalizedCalc|Normalized"))
+    }
+
+    data <- data %>%  select(!matches('model_.+$|std.error_.+$|statistic_.+$|p.value_.+$'))
+
+    plot <- data %>%
+      # filter(rowid == id_num) %>%
+      ggplot(aes(x = .data[[input$xcol]], y = .data[[input$ycol]], label = rowid)) +
+      { if (input$scatter_log_x)  scale_x_log10() } +
+      { if (input$scatter_log_y)  scale_y_log10() } +
+      geom_point(size = 3)
+    # coord_cartesian(ylim = c(input$min_plot_value, input$max_plot_value))
+
+      plotly::ggplotly(plot)
+
+  })
+
+
+  ### Rsquared Histogram #########
   output$R2_plot <- renderPlot({
     var <- "R.squared"
     if (input$AdjustedR2) {
@@ -610,11 +689,11 @@ server <- function(input, output) {
       {
         if (!input$hide_reference_line) geom_vline(xintercept = input$reference_line_R2)
       } +
-      scale_x_continuous(trans = "logit", breaks = c(0.5,0.9,0.95,0.99,0.999))
+      scale_x_continuous(trans = "logit", breaks = c(0.5, 0.9, 0.95, 0.99, 0.999))
   })
 
 
-  #### Ratio_plots
+  ### Ratio_plots ###########
   output$ratio_plot <- renderPlot({
     breaks <- imputeREE::Element_Data %>% filter(Element_name %in% REE_plus_Y_Elements)
     labels <- breaks$Element_name
@@ -623,43 +702,40 @@ server <- function(input, output) {
 
 
 
-    norm_table()[[2]] %>%  filter(R.squared > input$rsquared_filter) %>%
+    norm_table()[[2]] %>%
+      filter(R.squared > input$rsquared_filter) %>%
       # filter(Element_name %in% REE_Elements[-c(1,2,3,6)]) %>%
       arrange(desc(`Ionic Radius`)) %>%
       ggplot(aes(y = Ratio, x = forcats::fct_inorder(Element_name))) +
       geom_boxplot(
         # aes(fill = forcats::fct_inorder(Element_name))
       ) +
-      xlab('Element') +
-      geom_hline(yintercept = 1, lty = 2, alpha = 0.8)+
+      xlab("Element") +
+      geom_hline(yintercept = 1, lty = 2, alpha = 0.8) +
       # scale_fill_viridis_d() +
-      theme(legend.position = 'none')+
+      theme(legend.position = "none") +
       scale_y_log10(
         # labels = scales::label_number(accuracy = 0.00001)
       )
   })
 
 
-  download_data <- reactive(
-    {
-      data <- modelled_data()
+  download_data <- reactive({
+    data <- modelled_data()
 
 
-      if (input$include_norm_values == FALSE) {
-        data <- data %>% select(!matches("^NormalizedCalc|Normalized"))
-      }
-      if (input$impute) {
-        data <- data %>% impute_REE(rsquared = input$R_filter_export)
-      }
-      return(data)
+    if (input$include_norm_values == FALSE) {
+      data <- data %>% select(!matches("^NormalizedCalc|Normalized"))
     }
-  )
+    if (input$impute) {
+      data <- data %>% impute_REE(rsquared = input$R_filter_export)
+    }
+    return(data)
+  })
 
   #### downloads ####
 
   output$donwload_data <- downloadHandler(
-
-
     filename = function() {
       paste0(input$dataset, "calc.csv")
     },
@@ -667,9 +743,6 @@ server <- function(input, output) {
       write.csv(download_data(), file)
     }
   )
-
-
-
 }
 
 # Run the application

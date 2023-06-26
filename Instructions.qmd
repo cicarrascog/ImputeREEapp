@@ -1,24 +1,33 @@
 ---
 format: gfm
+editor: 
+  markdown: 
+    wrap: 72
 ---
+
 # ImputeREEapp
 
-This is a companion app ïn development for the [imputeREE package for
+This is a companion app in development for the [imputeREE package for
 R](https://github.com/cicarrascog/imputeREE). It allows the imputation
-of missing REE data and calculate Ce and Eu anomalies on magmatic zircon
-based on the
-Chondrite-Onuma and Chondrite-Lattice methods of [Carrasco-Godoy and
-Campbell (2023)](https://link.springer.com/article/10.1007/s00410-023-02025-9) and the
-logarithmic regression from [Zhong et al.
+of missing REE data and calculates Ce and Eu anomalies on magmatic
+zircon based on the Chondrite-Onuma and Chondrite-Lattice methods of
+[Carrasco-Godoy and Campbell
+(2023)](https://link.springer.com/article/10.1007/s00410-023-02025-9)
+and the logarithmic regression from [Zhong et al.
 (2019)](https://link.springer.com/article/10.1007/s00710-019-00682-y).
 
-On the left side of the sidebar is possible to access to the different
+On the left side of the sidebar is possible to access the different
 modules of the app and a general description of each section is included
 here.
 
 ## Important
 
-The coefficient of determination of each model give an idea of how well the model fits the data. However, it important to consider that for the Chondrite-Onuma model, which is base in a quadratic regression, R squared values will be always higher. 
+The coefficient of determination of each model gives an idea of how well
+the model fits the data. However, it is important to consider that R^2^
+values will be higher for the Chondrite-Onuma model, which is based on
+quadratic regression.
+
+R^2^ values lower than 0.95 should be reviewed with the Chondrite-Onuna.
 
 ## Uploads
 
@@ -48,15 +57,16 @@ be detrimental to the fittings. Using only light REE, only heavy REE or
 less than 4 REE is not recommended.
 
 The **R^2^** plot show the distribution of the R squared statistic for
-each model (one model per zircon grain). The option button (top right corner) allows to modify some
-elements on the plot (e.g. use adjusted R^2^ instead).
+each model (one model per zircon grain). The option button (top right
+corner) allows to modify some elements on the plot (e.g. use adjusted
+R^2^ instead).
 
 The **boxplot** show the ratios between the calculated and the measured
 values for each element. The horizontal line is a reference for ratio
 = 1. The option button allows to correct for deviations of Yb, Lu and Y.
 **This corrections are passed into the data, so the output file will
 have this values corrected**. A slider allows to filter the data
-according the R^2^ value which is only applyed to the plot.
+according the R^2^ value which is only applied to the plot.
 
 The last panel is a table with summary statistics of the ratio between
 calculated and measured data.
