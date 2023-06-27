@@ -24,24 +24,23 @@ here.
 
 The coefficient of determination of each model gives an idea of how well
 the model fits the data. However, it is important to consider that R^2^
-values will be higher for the Chondrite-Onuma model, which is based on
-quadratic regression.
+values will be higher for the Chondrite-Onuma, which is based on
+quadratic regression, than for the Chondrite-Lattice method.
 
-R^2^ values lower than 0.95 should be reviewed with the Chondrite-Onuna.
+## Upload Tab
 
-## Uploads
+A module to upload your data. The example data, which are zircons from
+[Ballard et al.
+(2002)](http://link.springer.com/10.1007/s00410-002-0402-5), are
+automatically loaded.
 
-A module to upload your data. The module automatically load the example
-data, which are zircons from [Ballard et al.
-(2002)](http://link.springer.com/10.1007/s00410-002-0402-5).
-
-To upload your data, please use the upload button in the **upload
-panel**. The column names of the REE **should include only the element
-name** (eg. `La`, not `La_final, final_corrected` or
-`this_La is the good one`) in **ppm**. **Large files will take longer to
-process**. Additional columns can be included. A column with the name
-`rowid` (row index used for relational data) is likely to give an error,
-please rename or exclude this column.
+Please use the upload button in the upload panel to upload your data.
+The column names of the REE **should include only the element name**
+(eg. `La`, not `La_final, final_corrected` or `this_La is the good one`)
+in **ppm**. **Large files will take longer to process**. Additional
+columns can be included. A column with the name `rowid` (row index used
+for relational data) is likely to give an error, please rename or
+exclude this column.
 
 The chondrite values selector allows to choose the reference of those
 values. Only those from [Palme and O'Neill

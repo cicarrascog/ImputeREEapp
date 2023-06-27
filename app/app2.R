@@ -14,19 +14,194 @@ library(reactable)
 library(reactablefmtr)
 library(markdown)
 library(bs4Dash)
+library(bslib)
 `%notin%` <- Negate(`%in%`)
 
 
 # UI Section ---------
-
-header <- bs4DashNavbar(
-  title = "ImputeREEapp",
-  border = F
-  # status = "red",
-  # skin = 'light'
-)
+#
+# header <- bs4DashNavbar(
+#   title = "ImputeREEapp",
+#   border = F
+#   # status = "red",
+#   # skin = 'light'
+# )
 
 ## sidebar pages definition ------
+
+color_by <- varSelectInput(
+  "color_by", "Color by",
+  c("species", "island", "sex"),
+  selected = "species"
+)
+
+card_Welcome <- card(
+  # card_header("Welcome"),
+  full_screen = F,
+      includeMarkdown("Instructions.md"))
+
+
+
+card_References <- card(
+  # card_header("Welcome"),
+  full_screen = TRUE,
+  includeMarkdown("Reference.md"))
+card_changelog <- card(
+  # card_header("Welcome"),
+  full_screen = TRUE,
+  includeMarkdown("Changelog.md"))
+card_license <- card(
+  # card_header("Welcome"),
+  full_screen = TRUE,
+  includeMarkdown("license.md"))
+card_contact <- card(
+  # card_header("Welcome"),
+  full_screen = TRUE,
+  includeMarkdown("Contact.md"))
+
+
+### Upload Tab
+
+card_fileupload <- card( #--------------
+  card_header("File upload") ,
+  label = boxLabel(text = "Help", status = "info", tooltip = "Upload a CSV file"),
+  fileInput(
+    inputId = "newFile",
+    label = NULL,
+    accept = c(".csv"),
+    buttonLabel = "Upload...",
+    placeholder = "a .csv file"
+  ),
+  radioButtons(
+    inputId = "chondrite_values",
+    label = "Chondrite Values",
+    choices = c(
+      `Palme and O'Neill (2014)` = "PalmeOneill2014CI",
+      `McDonough and Sun (1995)` = "McDonough1995CI"
+    )
+  )
+)
+
+card_model_Settings <- card(#--------------
+
+    card_header("Model settings"),
+    HTML("Selected elements are used for modelling. "),
+    textOutput("Rees"),
+    p(""),
+    radioButtons(
+      inputId = "method",
+      label = "Method",
+      choices = c(
+        `Chondrite-Onuma` = 3,
+        `Chondrite-Lattice` = 1,
+        `Zhong et al. (2019)` = 2
+      )
+    ),
+    checkboxGroupInput(
+      inputId = "NormalizeMethod",
+      label = "Chondrite Values",
+      inline = T,
+      choices = REE_plus_Y_Elements,
+      selected = REE_plus_Y_Elements[REE_plus_Y_Elements %notin%
+                                       c("La", "Ce", "Pr", "Eu", "Y")]
+    )
+
+)
+
+
+card_r2_histogram <- card(#--------------
+  card_header(HTML("R<sup>2</sup> histogram")),
+
+  layout_sidebar(
+    sidebar = sidebar(
+      title = 'Plot Settings',
+      position = "right",
+      sliderInput(
+        inputId = "reference_line_R2",
+        label = "Reference Line",
+        value = 0.95,
+        min = 0.5,
+        max = 0.999,
+        step = 0.005
+      ),
+      checkboxInput(
+        inputId = "hide_reference_line",
+        label = "Hide line"
+      ),
+      checkboxInput(
+        inputId = "AdjustedR2",
+        label = "Use adjusted R2"
+      )
+    ),
+    plotOutput("R2_plot")
+   ))
+
+
+card_boxplot <- card(#--------------
+  card_header("Ratio Boxplot"),
+
+  layout_sidebar(
+
+    sidebar = sidebar(
+      title = 'Plot Settings',
+      position = "right",
+      open = 'desktop',
+      sliderInput(
+      inputId = "rsquared_filter",
+      label = "R squared filter",
+      value = 0.9,
+      min = 0,
+      max = 2,
+      step = 0.001
+    )),
+    plotOutput("ratio_plot")
+  )
+  )
+
+card_summstats <- card(
+  card_header(HTML("Summary statistics")),
+  reactableOutput("ratio_table")
+)
+#--------------
+# card_Upload <- card(
+#   card_header("Upload"),
+#   full_screen = TRUE,
+#   includeMarkdown("Instructions.md"))
+
+# card_Data <- card(
+#   card_header("Welcome"),
+#   full_screen = TRUE,
+#   includeMarkdown("Instructions.md"))
+
+# card_Download <- card(
+#   card_header("Welcome"),
+#   full_screen = TRUE,
+#   includeMarkdown("Instructions.md"))
+
+
+ui <- page_navbar(
+
+  title = "imputeREEapp",
+  gap = validateCssUnit(5) ,
+  padding = validateCssUnit(5) ,
+  fillable = F,
+  # sidebar = color_by,
+  nav_panel(title = 'Welcome',layout_columns(card_Welcome)),
+  nav_panel(title = "Upload",
+
+            layout_columns(card_fileupload, card_model_Settings, gap = validateCssUnit(5) ),
+            layout_columns(card_r2_histogram, card_boxplot, gap = validateCssUnit(5)),
+            card_summstats),
+  nav_panel(title = "Data"),
+  nav_panel(title = "Download"),
+  nav_panel(title = "References", card_References),
+  nav_panel(title = "Changelog", card_changelog),
+  nav_panel(title = "License", card_license),
+  nav_panel(title = "Contact", card_contact)
+)
+
+
+
 sidebar <- dashboardSidebar(
   title = "ImputeREEapp",
   sidebarMenu(
@@ -44,10 +219,7 @@ sidebar <- dashboardSidebar(
 body <- dashboardBody(
   tabItems(
     ### Instruction Tab ------
-    tabItem(
-      tabName = "Instructions",
-      box(includeMarkdown("Instructions.md"), width = 10, collapsible = F)
-    ),
+
     ### Upload Tab ------
     tabItem(
       tabName = "Upload",
@@ -99,7 +271,7 @@ body <- dashboardBody(
             inline = T,
             choices = REE_plus_Y_Elements,
             selected = REE_plus_Y_Elements[REE_plus_Y_Elements %notin%
-              c("La", "Ce", "Pr", "Eu", "Y")]
+                                             c("La", "Ce", "Pr", "Eu", "Y")]
           )
         )
         ## here another box
@@ -294,7 +466,10 @@ body <- dashboardBody(
 
 
 # UI function ############
-ui <- dashboardPage(header = header, sidebar = sidebar, body = body,title = "ImputeREEapp", help = T)
+
+
+
+
 
 # server Section -----------
 # Define server logic required to draw a histogram
@@ -347,9 +522,9 @@ server <- function(input, output) {
         message = "Fitting Models",
         data <- data %>%
           modelChondrite_lattice(.,
-            exclude = REE_to_model,
-            chondrite = !!sym(input$chondrite_values),
-            Calibrate = T
+                                 exclude = REE_to_model,
+                                 chondrite = !!sym(input$chondrite_values),
+                                 Calibrate = T
           )
       )
     }
@@ -360,8 +535,8 @@ server <- function(input, output) {
       if (input$method == 2) {
         data <- data %>%
           modelZhong(.,
-            exclude = REE_to_model,
-            chondrite = !!sym(input$chondrite_values)
+                     exclude = REE_to_model,
+                     chondrite = !!sym(input$chondrite_values)
           )
       }
     )
@@ -371,9 +546,9 @@ server <- function(input, output) {
       if (input$method == 3) {
         data <- data %>%
           modelChondrite_Onuma(.,
-            exclude = REE_to_model,
-            chondrite = !!sym(input$chondrite_values),
-            Calibrate = T
+                               exclude = REE_to_model,
+                               chondrite = !!sym(input$chondrite_values),
+                               Calibrate = T
           )
       }
     )
@@ -409,32 +584,32 @@ server <- function(input, output) {
 
 
   ## Apply Corrections  ------
-  corrected_data <- reactive({
-    data <- base_data() %>%
-      imputeREE:::correct_heavy(
-        Y_correction_fact = input$Y,
-        Yb_correction_fact = input$Yb,
-        Lu_correction_fact = input$Lu,
-        Ho_correction_fact = input$Ho,
-        Er_correction_fact = input$Er,
-        Tm_correction_fact = input$Tm
-      ) %>%
-      imputeREE:::correct_middle(
-        Nd_correction_fact = input$Nd,
-        Sm_correction_fact = input$Sm,
-        Gd_correction_fact = input$Gd,
-        Tb_correction_fact = input$Tb,
-        Dy_correction_fact = input$Dy,
-        Pr_correction_fact = input$Pr
-      )
+  # corrected_data <- reactive({
+  #   data <- base_data() %>%
+  #     imputeREE:::correct_heavy(
+  #       Y_correction_fact = input$Y,
+  #       Yb_correction_fact = input$Yb,
+  #       Lu_correction_fact = input$Lu,
+  #       Ho_correction_fact = input$Ho,
+  #       Er_correction_fact = input$Er,
+  #       Tm_correction_fact = input$Tm
+  #     ) %>%
+  #     imputeREE:::correct_middle(
+  #       Nd_correction_fact = input$Nd,
+  #       Sm_correction_fact = input$Sm,
+  #       Gd_correction_fact = input$Gd,
+  #       Tb_correction_fact = input$Tb,
+  #       Dy_correction_fact = input$Dy,
+  #       Pr_correction_fact = input$Pr
+  #     )
 
-    return(data)
-  })
+  #   return(data)
+  # })
 
   ##  Create long format with normalized values ----------------
 
   norm_table <- reactive({
-    data <- corrected_data() %>%
+    data <- base_data() %>%
       select(rowid, `R.squared`, matches("Normalized")) %>%
       rename_with(.cols = matches("Normalized$"), ~ paste0("Normalized_", str_remove_all(.x, "_Normalized$"))) %>%
       pivot_longer(cols = matches("Normalized"), names_to = c(".value", "Element_name"), names_sep = "_") %>%
@@ -457,7 +632,7 @@ server <- function(input, output) {
 
     ### HERE ANOTHER CONDITIONAL FOR METHOD
 
-    data <- left_join(corrected_data(), data, by = "rowid") %>%
+    data <- left_join(base_data(), data, by = "rowid") %>%
       mutate(
         `Ce/Ce*` = Ce / ppmCalc_Ce,
         `Eu/Eu*` = Eu / ppmCalc_Eu
@@ -493,20 +668,20 @@ server <- function(input, output) {
 
 
     reactable(data %>% select(!matches("model_.+$|std.error_.+$|statistic_.+$|p.value_.+$")),
-      # %>%  select(-dplyr::last_col(15):-last_col()),
-      defaultPageSize = 15,
-      resizable = T,
-      showPageSizeOptions = T,
-      defaultColDef = colDef(format = reactable::colFormat(digits = 3)),
-      columns = list(
-        rowid = colDef(name = "ID", format = colFormat(digits = 0))
-      ),
-      highlight = T,
-      onClick = "select",
-      selection = "single",
-      filterable = T,
-      defaultSelected = 1,
-      theme = reactablefmtr::flatly()
+              # %>%  select(-dplyr::last_col(15):-last_col()),
+              defaultPageSize = 15,
+              resizable = T,
+              showPageSizeOptions = T,
+              defaultColDef = colDef(format = reactable::colFormat(digits = 3)),
+              columns = list(
+                rowid = colDef(name = "ID", format = colFormat(digits = 0))
+              ),
+              highlight = T,
+              onClick = "select",
+              selection = "single",
+              filterable = T,
+              defaultSelected = 1,
+              theme = reactablefmtr::flatly()
     )
   })
 
@@ -520,15 +695,15 @@ server <- function(input, output) {
 
     data <- norm_table()[[2]] %>% filter(rowid == id_num)
     reactable(data,
-      resizable = T,
-      # showPageSizeOptions = T,
-      # defaultPageSize = 8,
-      defaultColDef = colDef(format = reactable::colFormat(digits = 3)),
-      highlight = T,
-      theme = reactablefmtr::flatly(),
-      columns = list(
-        rowid = colDef(name = "ID", format = colFormat(digits = 0))
-      ),
+              resizable = T,
+              # showPageSizeOptions = T,
+              # defaultPageSize = 8,
+              defaultColDef = colDef(format = reactable::colFormat(digits = 3)),
+              highlight = T,
+              theme = reactablefmtr::flatly(),
+              columns = list(
+                rowid = colDef(name = "ID", format = colFormat(digits = 0))
+              ),
     )
   })
 
@@ -550,10 +725,10 @@ server <- function(input, output) {
       select(-ShannonRadiiVIII_Coord_3plus)
 
     reactable(data,
-      pagination = F,
-      highlight = T,
-      defaultColDef = colDef(format = reactable::colFormat(digits = 3)),
-      theme = flatly()
+              pagination = F,
+              highlight = T,
+              defaultColDef = colDef(format = reactable::colFormat(digits = 3)),
+              theme = flatly()
     )
   })
 
