@@ -13,12 +13,15 @@ Please cite [Zhong et al., Mineralogy and Petrology](https://link.springer.com/a
 
 The models are constructed using the [`imputeREE`
 package](https://cran.r-project.org/web/packages/imputeREE/index.html)
-and app is built using:[`Shiny`](https://github.com/rstudio/shiny),
-[`bs4Dash`](https://github.com/RinteRface/bs4Dash),
-[`reatable`](https://github.com/glin/reactable),
-[`tidyverse`](https://www.tidyverse.org/),
-[`reactablefmtr`](https://github.com/kcuilla/reactablefmtr/) and
-[`markdown`](https://cran.r-project.org/web/packages/markdown/index.html)
+and app is built using:
+[`bslib`](https://github.com/rstudio/bslib),
+[`markdown`](https://cran.r-project.org/web/packages/markdown/index.html),
+[`plotly`](https://plotly.com/),
+[`reactable`](https://github.com/glin/reactable),
+[`reactablefmtr`](https://github.com/kcuilla/reactablefmtr/) ,
+[`shiny`](https://github.com/rstudio/shiny),
+[`thematic`](https://rstudio.github.io/thematic/) and
+[`tidyverse`](https://www.tidyverse.org/)
 
 Code can be found here:
 

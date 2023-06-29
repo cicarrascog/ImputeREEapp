@@ -1,309 +1,277 @@
-# a
-# This is a Shiny web application. You can run the application by clicking
-# the 'Run App' button above.
-#
-# Find out more about building applications with Shiny here:
-#
-#    http://shiny.rstudio.com/
-#
 options(scipen = 100000)
 library(shiny)
+library(thematic)
+library(plotly)
 library(tidyverse)
 library(imputeREE)
 library(reactable)
 library(reactablefmtr)
 library(markdown)
-library(bs4Dash)
+library(bslib)
+
 `%notin%` <- Negate(`%in%`)
 
+card_Welcome1<- card(
+  card_header(HTML("<h2>Instructions</h2>")),
+  full_screen = F,
+  includeMarkdown("Instructions_card1.md"))
+card_Welcome2<- card(
+  card_header(html("<h2>Quick Start (tl;dr)</h2>")),
+  full_screen = F,
+  includeMarkdown("Instructions_card2.md"))
 
-# UI Section ---------
-
-header <- bs4DashNavbar(
-  title = "ImputeREEapp",
-  border = F
-  # status = "red",
-  # skin = 'light'
-)
-
-## sidebar pages definition ------
-sidebar <- dashboardSidebar(
-  title = "ImputeREEapp",
-  sidebarMenu(
-    menuItem(text = "Welcome", tabName = "Instructions"),
-    menuItem(text = "Upload", tabName = "Upload"),
-    menuItem(text = "Data", tabName = "Data"),
-    menuItem(text = "Download", tabName = "Download"),
-    menuItem(text = "References", tabName = "References"),
-    menuItem(text = "Changelog", tabName = "Changelog"),
-    menuItem(text = "License", tabName = "License"),
-    menuItem(text = "Contact", tabName = "Contact")
-  )
-)
-## Content of pages ------
-body <- dashboardBody(
-  tabItems(
-    ### Instruction Tab ------
-    tabItem(
-      tabName = "Instructions",
-      box(includeMarkdown("Instructions.md"), width = 10, collapsible = F)
-    ),
-    ### Upload Tab ------
-    tabItem(
-      tabName = "Upload",
-      fluidRow(
-        box(
-          title = HTML("<b>Upload</b>"),
-          width = 5,
-          headerBorder = F,
-          collapsible = F,
-          solidHeader = T,
-          label = boxLabel(text = "Help", status = "info", tooltip = "Upload a CSV file"),
-          fileInput(
-            inputId = "newFile",
-            label = NULL,
-            accept = c(".csv"),
-            buttonLabel = "Upload...",
-            placeholder = "a .csv file"
-          ),
-          radioButtons(
-            inputId = "chondrite_values",
-            label = "Chondrite Values",
-            choices = c(
-              `Palme and O'Neill (2014)` = "PalmeOneill2014CI",
-              `McDonough and Sun (1995)` = "McDonough1995CI"
-            )
-          )
-        ),
-        box(
-          title = HTML("<b>Model variables</b>"),
-          width = 7,
-          headerBorder = F,
-          collapsible = F,
-          solidHeader = T,
-          HTML("Selected elements are used for modelling. "),
-          textOutput("Rees"),
-          p(""),
-          radioButtons(
-            inputId = "method",
-            label = "Method",
-            choices = c(
-              `Chondrite-Onuma` = 3,
-              `Chondrite-Lattice` = 1,
-              `Zhong et al. (2019)` = 2
-            )
-          ),
-          checkboxGroupInput(
-            inputId = "NormalizeMethod",
-            label = "Chondrite Values",
-            inline = T,
-            choices = REE_plus_Y_Elements,
-            selected = REE_plus_Y_Elements[REE_plus_Y_Elements %notin%
-              c("La", "Ce", "Pr", "Eu", "Y")]
-          )
-        )
-        ## here another box
-      ),
-      fluidRow(
-        box(
-          title = HTML("<b>R<sup>2</sup> plot</b>"),
-          plotOutput("R2_plot"),
-          headerBorder = F,
-          collapsible = F,
-          solidHeader = T,
-          sidebar = boxSidebar(
-            id = "reference_line",
-            sliderInput(
-              inputId = "reference_line_R2",
-              label = "Reference Line",
-              value = 0.9,
-              min = 0.001,
-              max = 0.999,
-              step = 0.01
-            ),
-            checkboxInput(
-              inputId = "hide_reference_line",
-              label = "Hide line"
-            ),
-            checkboxInput(
-              inputId = "AdjustedR2",
-              label = "Use adjusted R2"
-            )
-          )
-        ),
-        box(
-          title = HTML("<b>Ratio Boxplot</b>"),
-          plotOutput("ratio_plot"),
-          headerBorder = F,
-          collapsible = F,
-          solidHeader = T,
-          sidebar = boxSidebar(
-            id = "correct_heavy_sliders",
-            HTML("R<sup>2</sup> filter. Evaluate correction only for models R<sup>2</sup> > 0.9"),
-            sliderInput(
-              inputId = "rsquared_filter",
-              label = "R squared filter",
-              value = 0.9,
-              min = 0,
-              max = 2,
-              step = 0.001
-            ),
-
-            #### Correction Factor Sliders -----------
-            HTML("This sliders are correction factors to accound for differences between measured and calculated values."),
-            sliderInput(inputId = "Pr", label = "Pr correction", value = 1 / 1, min = 0.1, max = 2),
-            sliderInput(inputId = "Nd", label = "Nd correction", value = 1 / 1, min = 0.1, max = 2),
-            sliderInput(inputId = "Sm", label = "Sm correction", value = 1 / 1, min = 0.1, max = 2),
-            sliderInput(inputId = "Gd", label = "Gd correction", value = 1 / 1, min = 0.1, max = 2),
-            sliderInput(inputId = "Tb", label = "Tb correction", value = 1 / 1, min = 0.1, max = 2),
-            sliderInput(inputId = "Dy", label = "Dy correction", value = 1 / 1, min = 0.1, max = 2),
-            sliderInput(inputId = "Ho", label = "Ho correction", value = 1 / 1, min = 0.1, max = 2),
-            sliderInput(inputId = "Er", label = "Er correction", value = 1 / 1, min = 0.1, max = 2),
-            sliderInput(inputId = "Tm", label = "Tm correction", value = 1 / 1, min = 0.1, max = 2),
-            sliderInput(inputId = "Yb", label = "Yb correction", value = 1 / 1, min = 0.1, max = 2),
-            sliderInput(inputId = "Lu", label = "Lu correction", value = 1 / 1, min = 0.1, max = 2),
-            sliderInput(inputId = "Y", label = "Y correction", value = 1 / 1, min = 0.1, max = 2),
-          )
-        ) ## here another box
-      ),
-      fluidRow(
-        box(
-          title = HTML("<b>Summary statistics</b>"),
-          width = 12,
-          reactableOutput("ratio_table")
-        )
-      ) ## here another fluidrow
-    ),
-    ### Data Tab ------
-    tabItem(
-      tabName = "Data",
-      #### plot and table ------------
-      fluidPage(
-        sidebarLayout(
-          sidebarPanel(
-            box(
-              width = 12,
-              headerBorder = F,
-              collapsible = F,
-              solidHeader = T,
-              plotOutput("REE_plot"),
-              sidebar = boxSidebar(
-                id = "Strain_check",
-                checkboxInput(inputId = "strain", label = "Use misfit expression?", value = F),
-                checkboxInput(inputId = "complete_lines", label = "Complete pattern when data is missing?", value = F),
-                checkboxInput(inputId = "hide_original", label = "Hide Original", value = F),
-                checkboxInput(inputId = "hide_calculated", label = "Hide Calculated", value = F),
-                checkboxInput(inputId = "hide_legend", label = "Hide Legend", value = F),
-                shiny::numericInput(inputId = "min_plot_value", value = NULL, label = "min y axis"),
-                shiny::numericInput(inputId = "max_plot_value", value = NULL, label = "max y axis"),
-              )
-            ),
-            #### scatter plot-------------
-            box(
-              width = 12,
-              title = "scatterplots",
-              html("Click the gear symbol to select variables"),
-              headerBorder = F,
-              collapsible = F,
-              solidHeader = F,
-              plotly::plotlyOutput("scatterplot"),
-              sidebar = bs4CardSidebar(
-                #   startOpen = T,
-                id = "scatterplot_setup",
-                uiOutput("scatterycol"),
-                uiOutput("scatterxcol"),
-                checkboxInput(inputId = "scatter_log_y", label = "log y", value = F),
-                checkboxInput(inputId = "scatter_log_x", label = "log x", value = F),
-                #
-              )
-            )
-          ),
-          mainPanel(box(
-            width = 12,
-            reactableOutput("Result")
-          ))
-        )
-      )
-    ),
+card_References <- card(
+  # card_header("Welcome"),
+  full_screen = TRUE,
+  includeMarkdown("Reference.md"))
+card_changelog <- card(
+  # card_header("Welcome"),
+  full_screen = TRUE,
+  includeMarkdown("Changelog.md"))
+card_license <- card(
+  # card_header("Welcome"),
+  full_screen = TRUE,
+  includeMarkdown("license.md"))
+card_contact <- card(
+  # card_header("Welcome"),
+  full_screen = TRUE,
+  includeMarkdown("Contact.md"))
 
 
+### Upload Tab
 
-    ### Download Tab ------
-    tabItem(
-      tabName = "Download",
-      HTML("<h2>Description of Downloaded Data to be added</h2>"),
-      fluidRow(
-        box(
-          title = HTML("<h3>Impute Values?</h3>"),
-          HTML("Ticking this option will add a column for each REE in the format <code>Imputed_REEname</code>,
-             where missing values are replaced for those calculated from this regression. Measured values are kept."),
-          HTML("The R<sup>2</sup> slider, allows to set a threshold for imputation. Models with a fitting lower than the threshold are not imputed"),
-          sliderInput(inputId = "R_filter_export", label = HTML("R<sup>2</sup> filter"), value = 0.99, min = 0.9, max = 1, step = 0.001),
-          tooltip(
-            title = "Should imputed values be included in the Output?",
-            placement = "right",
-            tag = checkboxInput(
-              inputId = "impute",
-              label = "Impute?",
-              value = FALSE
-            )
-          )
-        ),
-        box(
-          title = HTML("<h3>Include Chondrite nomalized values?</h3>"),
-          HTML("Ticking this option will add a column for each REE in the format <code>Normalized_REEname</code> and <code>NormalizedCalc_REEname</code> to include the Chondrite normalized values using measured and calculated concentrations, respectively."),
-          tooltip(
-            title = "Should Chondrite normalized values be included in the Output?",
-            placement = "right",
-            tag = checkboxInput(
-              inputId = "include_norm_values",
-              label = "Include Chondrite Normalized Values?",
-              value = FALSE
-            )
-          )
-        )
-      ),
-      box(
-        Title = HTML("<h2>Click below to download</h2>"),
-        downloadButton(outputId = "donwload_data")
-      )
-    ),
-    ### References Tab ------
-    tabItem(
-      tabName = "References",
-      box(includeMarkdown("Reference.md"), width = 9)
-    ),
-    tabItem(
-      tabName = "License",
-      box(includeMarkdown("license.md"), width = 8)
-    ),
-    ### Changelog Tab ------
-    tabItem(
-      tabName = "Changelog",
-      box(includeMarkdown("Changelog.md"), width = 9)
-    ),
-    tabItem(
-      ### Contact Tab ------
-      tabName = "Contact",
-      box(includeMarkdown("Contact.md"), width = 9)
+card_fileupload <- card( #--------------
+  # card_header("File upload") ,
+  fileInput(
+    inputId = "newFile",
+    label = NULL,
+    accept = c(".csv"),
+    buttonLabel = "Upload...",
+    placeholder = "a .csv file"
+  ),
+  radioButtons(
+    inputId = "chondrite_values",
+    label = "Chondrite Values",
+    choices = c(
+      `Palme and O'Neill (2014)` = "PalmeOneill2014CI",
+      `McDonough and Sun (1995)` = "McDonough1995CI"
     )
   )
 )
 
+card_model_Settings <- card(# model settings --------------
+
+
+    textOutput("Rees"),
+    checkboxGroupInput(
+      inputId = "NormalizeMethod",
+      label = "Chondrite Values",
+      inline = T,
+      choices = REE_plus_Y_Elements,
+      selected = REE_plus_Y_Elements[REE_plus_Y_Elements %notin%
+                                       c("La", "Ce", "Pr", "Eu", "Y")]
+    )
+
+)
+
+card_model_Settings2 <- card(# model settings --------------
+radioButtons(
+  inputId = "method",
+  label = "Method",
+  choices = c(
+    `Chondrite-Onuma` = 3,
+    `Chondrite-Lattice` = 1,
+    `Zhong et al. (2019)` = 2
+  )))
+
+
+card_r2_histogram <- card(##r2 histogram--------------
+  card_header(HTML("R<sup>2</sup> histogram")),
+    layout_sidebar(
+    sidebar = sidebar(
+      title = 'Plot Settings',
+      position = "right",
+      sliderInput(
+        inputId = "reference_line_R2",
+        label = "Reference Line",
+        value = 0.95,
+        min = 0.5,
+        max = 0.999,
+        step = 0.005
+      ),
+      checkboxInput(
+        inputId = "hide_reference_line",
+        label = "Hide line"
+      ),
+      checkboxInput(
+        inputId = "AdjustedR2",
+        label = "Use adjusted R2"
+      )
+    ),
+    plotOutput("R2_plot")
+   ))
+
+
+card_boxplot <- card(## card_boxplot--------------
+  card_header("Ratio Boxplot"),
+    layout_sidebar(
+
+    sidebar = sidebar(
+      title = 'Plot Settings',
+      position = "right",
+      open = 'desktop',
+      sliderInput(
+      inputId = "rsquared_filter",
+      label = "R squared filter",
+      value = 0.9,
+      min = 0,
+      max = 2,
+      step = 0.001
+    )),
+    plotOutput("ratio_plot")
+  )
+  )
+
+card_summstats <- card( ## card_summstats-------------
+  card_header(HTML("Summary statistics")),max_height = '30%',
+  reactableOutput("ratio_table")
+)
 
 
 
-# UI function ############
-ui <- dashboardPage(header = header, sidebar = sidebar, body = body,title = "ImputeREEapp", help = T)
+# Data Tab--------------
+card_Reactable <- card(##card_Reactable-----------------
+                       full_screen = T,fill = T,
+  reactableOutput("Result")
+)
+
+card_REE_plot <- card(##card_REE_plot-------------
+  max_height = '350',
+                      card_header('Chondrite-Normalized pattern'),
+  layout_sidebar(
+    sidebar = sidebar(
+      title = 'Plot Settings',
+      position = "right",
+      checkboxInput(inputId = "strain", label = "Use misfit expression?", value = F),
+      checkboxInput(inputId = "complete_lines", label = "Complete pattern when data is missing?", value = F),
+      checkboxInput(inputId = "hide_original", label = "Hide Original", value = F),
+      checkboxInput(inputId = "hide_calculated", label = "Hide Calculated", value = F),
+      checkboxInput(inputId = "hide_legend", label = "Hide Legend", value = F),
+      shiny::numericInput(inputId = "min_plot_value", value = NULL, label = "min y axis"),
+      shiny::numericInput(inputId = "max_plot_value", value = NULL, label = "max y axis")),
+    plotOutput("REE_plot")
+  )
+)
+
+
+card_scatterplot_plotly <-card(##card_scatterplot_plotly-------------
+  max_height = '400',
+                               card_header('Scatterplot'),
+                                layout_sidebar(
+                                  sidebar = sidebar(
+                                    title = 'Plot Settings',
+                                    position = "right",
+                                    uiOutput("scatterycol"),
+                                    uiOutput("scatterxcol"),
+                                    checkboxInput(inputId = "scatter_log_y", label = "log y", value = F),
+                                    checkboxInput(inputId = "scatter_log_x", label = "log x", value = T),
+                                      #
+                                    ),
+                                  plotly::plotlyOutput("scatterplot"),
+
+                                  ))
+
+
+# Downliad Tab =========================
+
+
+card_Download_settings <- card( ## card_Download_settings ======
+
+  card_header(HTML("<h4>Impute Values?</h4>")),
+  markdown("Ticking this option will add a column for each REE in the format `Imputed_[REEname]`,
+             where missing values are replaced for those calculated from the model. Measured values are kept."),
+  markdown("The slider allows to set a threshold for imputation so models with R<sup>2</sup> lower than the threshold are not imputed"),
+  HTML("Check important info in the welcome tab for more details."),
+  sliderInput(inputId = "R_filter_export", label = HTML("R<sup>2</sup> filter"), value = 0.99, min = 0.9, max = 1, step = 0.001),
+  checkboxInput(
+    inputId = "impute",
+    label = "Impute?",
+    value = FALSE
+  )
+)
+
+
+card_include_norm <- card(
+  card_header(HTML("<h4>Include Chondrite nomalized values?</h4>")),
+
+  markdown("Ticking this option will add a column for each REE in the format `[REEname]_Normalized` and `NormalizedCalc_[REEname]` to include the Chondrite normalized values using measured and calculated concentrations, respectively."),
+  checkboxInput(
+    inputId = "include_norm_values",
+    label = "Include Chondrite Normalized Values?",
+    value = FALSE)
+)
+
+
+  Download_card <- card(
+    markdown('**Download Info**'),
+    markdown('Ce/Ce* and Eu/Eu* are calculaded using Ce* from the regression models (ppmCalc_Ce and ppmCalc_Eu, respectively).'),
+    markdown('If the Chondrite-Lattice method is used, Intercept and slope are returned.'),
+    markdown('If the Chondrite-Onuma method is used, parabola parameters (a,b, and intercept) are returned.'),
+    markdown('Columns starting with `ppmCalc_` are calculated values in ppm.'),
+    markdown('Columns starting with `NormalizedCalc_` are calculated chondrite-normalized values'),
+    markdown('Columns starting with `Ratio_` are ratio between calculated and measured values (not applicable when data are missing).'),
+    markdown("**Click below to download**"),
+    downloadButton(outputId = "donwload_data")
+  )
+
+ui <- page_navbar( # UI ----------
+
+  theme = bs_theme(bootswatch = 'darkly'),
+  title = "imputeREEapp",
+  gap = validateCssUnit(5) ,
+  padding = validateCssUnit(5) ,
+  fillable = T,
+  # sidebar = color_by,
+  nav_panel(title = 'Welcome',
+            includeMarkdown("Instructions.md"),
+            layout_columns(card_Welcome2, card_Welcome1)),
+  nav_panel(title = "Upload",
+
+            layout_columns(card_fileupload, card_model_Settings,card_model_Settings2, gap = validateCssUnit(5), height = '30%'),
+            layout_columns(card_r2_histogram, card_boxplot, gap = validateCssUnit(5)),
+            card_summstats),
+  nav_panel(title = "Data",
+            bslib::layout_sidebar(
+              sidebar = sidebar(
+
+                card_REE_plot,
+                card_scatterplot_plotly,
+                width= validateCssUnit("45%")),
+              reactableOutput("Result", height = '100%'))),
+
+  nav_panel(title = "Download", page_sidebar(
+    card_Download_settings,
+    card_include_norm,
+    sidebar = sidebar(Download_card, open ='always', width = "50%"))),
+
+  nav_panel(title = "References", card_References),
+
+  nav_panel(title = "Changelog", card_changelog),
+
+  nav_panel(title = "License", card_license),
+
+  nav_panel(title = "Contact", card_contact))
+
+
+
 
 # server Section -----------
 # Define server logic required to draw a histogram
 server <- function(input, output) {
-  thematic::thematic_shiny() ## makes plots to match html theme
+thematic::thematic_shiny()
 
 
-  ## Load Testing data ------
-  sample_data <- reactive({
+    sample_data <- reactive({
     Ballard_et_al_Zircon %>%
       # slice(1:500) %>%
       select(matches(paste0("Zr_", REE_plus_Y_Elements, "_ppm")), Zr_P_ppm) %>%
@@ -347,9 +315,9 @@ server <- function(input, output) {
         message = "Fitting Models",
         data <- data %>%
           modelChondrite_lattice(.,
-            exclude = REE_to_model,
-            chondrite = !!sym(input$chondrite_values),
-            Calibrate = T
+                                 exclude = REE_to_model,
+                                 chondrite = !!sym(input$chondrite_values),
+                                 Calibrate = T
           )
       )
     }
@@ -360,8 +328,8 @@ server <- function(input, output) {
       if (input$method == 2) {
         data <- data %>%
           modelZhong(.,
-            exclude = REE_to_model,
-            chondrite = !!sym(input$chondrite_values)
+                     exclude = REE_to_model,
+                     chondrite = !!sym(input$chondrite_values)
           )
       }
     )
@@ -371,9 +339,9 @@ server <- function(input, output) {
       if (input$method == 3) {
         data <- data %>%
           modelChondrite_Onuma(.,
-            exclude = REE_to_model,
-            chondrite = !!sym(input$chondrite_values),
-            Calibrate = T
+                               exclude = REE_to_model,
+                               chondrite = !!sym(input$chondrite_values),
+                               Calibrate = T
           )
       }
     )
@@ -409,32 +377,32 @@ server <- function(input, output) {
 
 
   ## Apply Corrections  ------
-  corrected_data <- reactive({
-    data <- base_data() %>%
-      imputeREE:::correct_heavy(
-        Y_correction_fact = input$Y,
-        Yb_correction_fact = input$Yb,
-        Lu_correction_fact = input$Lu,
-        Ho_correction_fact = input$Ho,
-        Er_correction_fact = input$Er,
-        Tm_correction_fact = input$Tm
-      ) %>%
-      imputeREE:::correct_middle(
-        Nd_correction_fact = input$Nd,
-        Sm_correction_fact = input$Sm,
-        Gd_correction_fact = input$Gd,
-        Tb_correction_fact = input$Tb,
-        Dy_correction_fact = input$Dy,
-        Pr_correction_fact = input$Pr
-      )
+  # corrected_data <- reactive({
+  #   data <- base_data() %>%
+  #     imputeREE:::correct_heavy(
+  #       Y_correction_fact = input$Y,
+  #       Yb_correction_fact = input$Yb,
+  #       Lu_correction_fact = input$Lu,
+  #       Ho_correction_fact = input$Ho,
+  #       Er_correction_fact = input$Er,
+  #       Tm_correction_fact = input$Tm
+  #     ) %>%
+  #     imputeREE:::correct_middle(
+  #       Nd_correction_fact = input$Nd,
+  #       Sm_correction_fact = input$Sm,
+  #       Gd_correction_fact = input$Gd,
+  #       Tb_correction_fact = input$Tb,
+  #       Dy_correction_fact = input$Dy,
+  #       Pr_correction_fact = input$Pr
+  #     )
 
-    return(data)
-  })
+  #   return(data)
+  # })
 
   ##  Create long format with normalized values ----------------
 
   norm_table <- reactive({
-    data <- corrected_data() %>%
+    data <- base_data() %>%
       select(rowid, `R.squared`, matches("Normalized")) %>%
       rename_with(.cols = matches("Normalized$"), ~ paste0("Normalized_", str_remove_all(.x, "_Normalized$"))) %>%
       pivot_longer(cols = matches("Normalized"), names_to = c(".value", "Element_name"), names_sep = "_") %>%
@@ -457,7 +425,7 @@ server <- function(input, output) {
 
     ### HERE ANOTHER CONDITIONAL FOR METHOD
 
-    data <- left_join(corrected_data(), data, by = "rowid") %>%
+    data <- left_join(base_data(), data, by = "rowid") %>%
       mutate(
         `Ce/Ce*` = Ce / ppmCalc_Ce,
         `Eu/Eu*` = Eu / ppmCalc_Eu
@@ -493,44 +461,24 @@ server <- function(input, output) {
 
 
     reactable(data %>% select(!matches("model_.+$|std.error_.+$|statistic_.+$|p.value_.+$")),
-      # %>%  select(-dplyr::last_col(15):-last_col()),
-      defaultPageSize = 15,
-      resizable = T,
-      showPageSizeOptions = T,
-      defaultColDef = colDef(format = reactable::colFormat(digits = 3)),
-      columns = list(
-        rowid = colDef(name = "ID", format = colFormat(digits = 0))
-      ),
-      highlight = T,
-      onClick = "select",
-      selection = "single",
-      filterable = T,
-      defaultSelected = 1,
-      theme = reactablefmtr::flatly()
+              # %>%  select(-dplyr::last_col(15):-last_col()),
+              defaultPageSize = 15,
+              resizable = T,
+              showPageSizeOptions = T,
+              defaultColDef = colDef(format = reactable::colFormat(digits = 3)),
+              columns = list(
+                rowid = colDef(name = "ID", format = colFormat(digits = 0))
+              ),
+              highlight = T,
+              onClick = "select",
+              selection = "single",
+              filterable = T,
+              defaultSelected = 1,
+              theme = reactablefmtr::darkly()
     )
   })
 
-  ###  Summary table in upload ##############
-  output$REE <- renderReactable({
-    req(getReactableState("Result")$selected)
-    id_num <- getReactableState("Result")$selected
 
-    # req(getReactableState("Result")$selected)
-
-
-    data <- norm_table()[[2]] %>% filter(rowid == id_num)
-    reactable(data,
-      resizable = T,
-      # showPageSizeOptions = T,
-      # defaultPageSize = 8,
-      defaultColDef = colDef(format = reactable::colFormat(digits = 3)),
-      highlight = T,
-      theme = reactablefmtr::flatly(),
-      columns = list(
-        rowid = colDef(name = "ID", format = colFormat(digits = 0))
-      ),
-    )
-  })
 
 
   output$ratio_table <- renderReactable({
@@ -550,10 +498,11 @@ server <- function(input, output) {
       select(-ShannonRadiiVIII_Coord_3plus)
 
     reactable(data,
-      pagination = F,
-      highlight = T,
-      defaultColDef = colDef(format = reactable::colFormat(digits = 3)),
-      theme = flatly()
+
+              pagination = F,
+              highlight = T,
+              defaultColDef = colDef(format = reactable::colFormat(digits = 3)),
+              theme = reactablefmtr::darkly(),
     )
   })
 
@@ -606,11 +555,13 @@ server <- function(input, output) {
       } +
       geom_point(size = 3) +
       geom_line() +
-      scale_y_log10(
+      scale_y_log10(minor_breaks = NULL
 
         # labels = scales::label_number(accuracy = 0.00001)
       ) +
       scale_x_reverse(breaks = breaks, labels = labels, minor_breaks = NULL) +
+      scale_color_viridis_d(labels = c('Measured','Calculated')) +
+      annotation_logticks(sides = 'l') +
       coord_cartesian(ylim = c(input$min_plot_value, input$max_plot_value))
   })
 
@@ -649,7 +600,10 @@ server <- function(input, output) {
 
     selectInput("ycol", "Y Variable", choices = choices, selected = "Pr", multiple = F, selectize = T)
   })
-  # scatter_log_x
+
+
+
+
   output$scatterplot <- plotly::renderPlotly({
     data <- modelled_data()
 
@@ -659,19 +613,19 @@ server <- function(input, output) {
 
     data <- data %>% select(!matches("model_.+$|std.error_.+$|statistic_.+$|p.value_.+$"))
 
-    plot <- data %>%
-      # filter(rowid == id_num) %>%
-      ggplot(aes(x = .data[[input$xcol]], y = .data[[input$ycol]], label = rowid)) +
-      {
-        if (input$scatter_log_x) scale_x_log10()
-      } +
-      {
-        if (input$scatter_log_y) scale_y_log10()
-      } +
-      geom_point(size = 3)
-    # coord_cartesian(ylim = c(input$min_plot_value, input$max_plot_value))
 
-    plotly::ggplotly(plot)
+    fig <- plotly::plot_ly(data, x = ~.data[[input$xcol]], y = ~.data[[input$ycol]], text = ~paste('ID:',.data[['rowid']]))
+    fig <- fig %>%  plotly::layout(xaxis = list(title = as.character(input$xcol)),
+                            yaxis = list(title = as.character(input$ycol))) %>% plotly::layout(plot_bgcolor = '#444', paper_bgcolor = '#303030', font = list(color = 'white'), xaxis = list(gridcolor = '#303030'),yaxis = list(gridcolor = '#303030'))
+
+    if (input$scatter_log_x) {
+      fig <- fig %>%  plotly::layout( xaxis = list(type = "log"))
+    }
+    if (input$scatter_log_y) {
+      fig <- fig %>%  plotly::layout( yaxis = list(type = "log"))
+    }
+   fig
+
   })
 
 
@@ -722,14 +676,16 @@ server <- function(input, output) {
 
   download_data <- reactive({
     data <- modelled_data()
-
+    data <-data %>%  mutate(model_r.squared = R.squared)
 
     if (input$include_norm_values == FALSE) {
       data <- data %>% select(!matches("^NormalizedCalc|Normalized"))
     }
     if (input$impute) {
       data <- data %>% impute_REE(rsquared = input$R_filter_export)
-    }
+      data <- data %>%  select(-model_r.squared)
+       }
+    data <- data %>% select(!matches("model_.+$|std.error_.+$|statistic_.+$|p.value_.+$"))
     return(data)
   })
 
