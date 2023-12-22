@@ -9,6 +9,9 @@ library(reactablefmtr)
 library(markdown)
 library(bslib)
 
+
+
+
 `%notin%` <- Negate(`%in%`)
 
 card_Welcome1<- card(
@@ -226,7 +229,7 @@ card_include_norm <- card(
 
 ui <- page_navbar( # UI ----------
 
-  theme = bs_theme(bootswatch = 'darkly'),
+  theme = bs_theme(),
   title = "imputeREEapp",
   gap = validateCssUnit(5) ,
   padding = validateCssUnit(5) ,
@@ -260,7 +263,11 @@ ui <- page_navbar( # UI ----------
 
   nav_panel(title = "License", card_license),
 
-  nav_panel(title = "Contact", card_contact))
+  nav_panel(title = "Contact", card_contact),
+  nav_spacer(),
+  nav_item(
+    input_dark_mode(id = "dark_mode", mode = "light")
+  ))
 
 
 
@@ -268,7 +275,9 @@ ui <- page_navbar( # UI ----------
 # server Section -----------
 # Define server logic required to draw a histogram
 server <- function(input, output) {
-thematic::thematic_shiny()
+thematic::thematic_shiny(font = font_spec(scale = 1.5))
+
+
 
 
     sample_data <- reactive({
@@ -459,7 +468,23 @@ thematic::thematic_shiny()
       data <- data %>% select(!matches("^NormalizedCalc|Normalized"))
     }
 
-
+if (input$dark_mode == 'dark') {
+  reactable(data %>% select(!matches("model_.+$|std.error_.+$|statistic_.+$|p.value_.+$")),
+            # %>%  select(-dplyr::last_col(15):-last_col()),
+            defaultPageSize = 15,
+            resizable = T,
+            showPageSizeOptions = T,
+            defaultColDef = colDef(format = reactable::colFormat(digits = 3)),
+            columns = list(
+              rowid = colDef(name = "ID", format = colFormat(digits = 0))
+            ),
+            highlight = T,
+            onClick = "select",
+            selection = "single",
+            filterable = T,
+            defaultSelected = 1,
+            theme = reactablefmtr::slate())
+} else{
     reactable(data %>% select(!matches("model_.+$|std.error_.+$|statistic_.+$|p.value_.+$")),
               # %>%  select(-dplyr::last_col(15):-last_col()),
               defaultPageSize = 15,
@@ -473,9 +498,9 @@ thematic::thematic_shiny()
               onClick = "select",
               selection = "single",
               filterable = T,
-              defaultSelected = 1,
-              theme = reactablefmtr::darkly()
-    )
+              defaultSelected = 1)}
+
+
   })
 
 
@@ -496,14 +521,24 @@ thematic::thematic_shiny()
       imputeREE:::add_IonicRadii() %>%
       arrange(desc(ShannonRadiiVIII_Coord_3plus)) %>%
       select(-ShannonRadiiVIII_Coord_3plus)
+if (input$dark_mode == 'dark') {
+  reactable(data,
 
-    reactable(data,
+            pagination = F,
+            highlight = T,
+            defaultColDef = colDef(format = reactable::colFormat(digits = 3)),
+            theme = reactablefmtr::dark()
+  )
+} else {
+  reactable(data,
 
-              pagination = F,
-              highlight = T,
-              defaultColDef = colDef(format = reactable::colFormat(digits = 3)),
-              theme = reactablefmtr::darkly(),
-    )
+            pagination = F,
+            highlight = T,
+            defaultColDef = colDef(format = reactable::colFormat(digits = 3))
+  )
+
+}
+
   })
 
   # Plots ######
@@ -616,7 +651,10 @@ thematic::thematic_shiny()
 
     fig <- plotly::plot_ly(data, x = ~.data[[input$xcol]], y = ~.data[[input$ycol]], text = ~paste('ID:',.data[['rowid']]))
     fig <- fig %>%  plotly::layout(xaxis = list(title = as.character(input$xcol)),
-                            yaxis = list(title = as.character(input$ycol))) %>% plotly::layout(plot_bgcolor = '#444', paper_bgcolor = '#303030', font = list(color = 'white'), xaxis = list(gridcolor = '#303030'),yaxis = list(gridcolor = '#303030'))
+                            yaxis = list(title = as.character(input$ycol)))
+
+
+    #
 
     if (input$scatter_log_x) {
       fig <- fig %>%  plotly::layout( xaxis = list(type = "log"))
@@ -624,8 +662,9 @@ thematic::thematic_shiny()
     if (input$scatter_log_y) {
       fig <- fig %>%  plotly::layout( yaxis = list(type = "log"))
     }
-   fig
-
+    ## this is the dark mode for plotly ----------------
+    if(input$dark_mode=='dark'){
+    fig <- fig %>% plotly::layout(plot_bgcolor = '#444', paper_bgcolor = '#303030', font = list(color = 'white'), xaxis = list(gridcolor = '#303030'),yaxis = list(gridcolor = '#303030'))} else {fig}
   })
 
 
