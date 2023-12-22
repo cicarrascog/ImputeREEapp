@@ -640,6 +640,7 @@ if (input$dark_mode == 'dark') {
 
 
   output$scatterplot <- plotly::renderPlotly({
+    req(modelled_data())
     data <- modelled_data()
 
     if (input$include_norm_values == FALSE) {
@@ -650,6 +651,8 @@ if (input$dark_mode == 'dark') {
 
 
     fig <- plotly::plot_ly(data, x = ~.data[[input$xcol]], y = ~.data[[input$ycol]], text = ~paste('ID:',.data[['rowid']]))
+
+
     fig <- fig %>%  plotly::layout(xaxis = list(title = as.character(input$xcol)),
                             yaxis = list(title = as.character(input$ycol)))
 
